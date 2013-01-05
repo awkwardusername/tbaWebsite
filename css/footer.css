@@ -1,0 +1,25 @@
+﻿.podbar {
+    bottom: 0;
+    background-color: #666;
+    position: fixed;
+    /* margin-top:5px; */
+    min-width: 100%;
+    text-align: right;
+    z-index: 150;
+    _position: absolute;
+    _top: expression(eval(document.documentElement.scrollTop+
+        (document.documentElement.clientHeight-this.offsetHeight)));
+    height: 35px;
+}
+
+#navi {
+    background: #101010;
+    color: #cecece;
+    text-align: left;
+    padding: 7px;
+    padding-left: 10pt;
+    font-weight: bold;
+    font-size: 12pt;
+
+}
+
