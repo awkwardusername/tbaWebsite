@@ -2,23 +2,20 @@
 
 $db_type = 'mysqli';
 $db_host = 'localhost';
-$db_name = 'tba';
-$db_username = 'root';
-$db_password = 'Password???';
-$db_prefix = 'forum_';
-$p_connect = FALSE;
+$db_name = 'db_03338284';
+$db_username = 'user_03338284';
+$db_password = 'i-.Ri3KoCdNbW9';
+$db_prefix = 'bb_';
+$p_connect = false;
 
-$base_url = 'http://localhost:1359/TheBloodAmbulance/forum';
+$base_url = 'http://localhost/TheBloodAmbulance/forum';
 
-$cookie_name = 'forum_cookie_ef4240';
+$cookie_name = 'forum_cookie_e5a4ae';
 $cookie_domain = '';
 $cookie_path = '/';
 $cookie_secure = 0;
 
 define('FORUM', 1);
-
-// Enable if all admins are logged out and you want to turn off Maintenance Mode
-// define('FORUM_TURN_OFF_MAINT', 1);
 
 // Enable DEBUG mode by removing // from the following line
 //define('FORUM_DEBUG', 1);

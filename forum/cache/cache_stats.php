@@ -1,18 +1,17 @@
 <?php
 
-if (!defined('FORUM_STATS_LOADED'))
-    define('FORUM_STATS_LOADED', 1);
+if (!defined('FORUM_STATS_LOADED')) define('FORUM_STATS_LOADED', 1);
 
-$forum_stats = array(
-    'total_users' => '3',
-    'last_user' =>
-    array(
-        'id' => '4',
-        'username' => 'temoto.kun',
-    ),
-    'total_topics' => '3',
-    'total_posts' => '4',
-    'cached' => 1357428009,
+$forum_stats = array (
+  'total_users' => '1',
+  'last_user' => 
+  array (
+    'id' => '2',
+    'username' => 'awkwardusername',
+  ),
+  'total_topics' => NULL,
+  'total_posts' => NULL,
+  'cached' => 1357500891,
 );
 
 ?>

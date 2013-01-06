@@ -2,10 +2,10 @@
 
 define('FORUM_HOOKS_LOADED', 1);
 
-$forum_hooks = array(
-    'po_pre_optional_fieldset' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+$forum_hooks = array (
+  'po_pre_optional_fieldset' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_tags\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
@@ -58,10 +58,10 @@ if ($fid && $forum_user[\'g_pun_tags_allow\'])
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_pre_checkbox_display' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ed_pre_checkbox_display' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_tags\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
@@ -92,10 +92,10 @@ if ($can_edit_subject && $forum_user[\'g_pun_tags_allow\'])
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ft_js_include' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ft_js_include' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_jquery\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\',
@@ -129,10 +129,10 @@ switch ($forum_config[\'o_pun_jquery_include_method\'])
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'vt_row_pre_display' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'vt_row_pre_display' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -160,989 +160,403 @@ if ((isset($vote_results) || isset($vote_form)) && ($cur_post[\'id\'] == $cur_to
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ul_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_admin_add_user\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_admin_add_user\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_admin_add_user\',
+  ),
+  'aex_section_manage_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_repository\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_repository\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_repository\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
-if ($forum_user[\'g_id\'] == FORUM_ADMIN)
-			{
-				$errors_add_users = array();
-				if (isset($_POST[\'add_user_form_sent\']) && $_POST[\'add_user_form_sent\'] == 1)
-				{
-					$forum_extension[\'admin_add_user\'][\'user_added\'] = false;
+if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
+	include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
+else
+	include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
 
-					require_once FORUM_ROOT.\'include/functions.php\';
-					require_once FORUM_ROOT.\'lang/\'.$forum_user[\'language\'].\'/profile.php\';
+require_once $ext_info[\'path\'].\'/pun_repository.php\';
 
-					$username = trim($_POST[\'req_username\']);
-					$email = strtolower(trim($_POST[\'req_email\']));
+($hook = get_hook(\'pun_repository_pre_display_ext_list\')) ? eval($hook) : null;
 
-					// Validate the username
-					$errors_add_users = validate_username($username);
-
-					// ... and the e-mail address
-					require_once FORUM_ROOT.\'include/email.php\';
-
-					if (!is_valid_email($email))
-					   $errors_add_users[] = $lang_common[\'Invalid e-mail\'];
-
-					// Check if it\'s a banned e-mail address
-					$banned_email = is_banned_email($email);
-					if ($banned_email && $forum_config[\'p_allow_banned_email\'] == \'0\')
-						$errors_add_users[] = $lang_profile[\'Banned e-mail\'];
-
-					// Check if someone else already has registered with that e-mail address
-					$q = array(
-						\'SELECT\'	=> \'COUNT(u.username)\',
-						\'FROM\'	  	=> \'users AS u\',
-						\'WHERE\'		=> \'u.email=\\\'\'.$forum_db->escape($email).\'\\\'\'
-					);
-
-					$result = $forum_db->query_build( $q ) or error(__FILE__, __LINE__);
-
-					if (($forum_config[\'p_allow_dupe_email\'] == \'0\') && ($forum_db->result($result) > 0))
-						$errors_add_users[] = $lang_profile[\'Dupe e-mail\'];
-
-					if (empty($errors_add_users))
-					{
-						$salt = random_key(12);
-						$password = random_key(8, true);
-						$password_hash = sha1($salt.sha1($password));
-
-						$errors = add_user(
-							array(
-								\'username\'				=> $username,
-								\'group_id\'				=> ($forum_config[\'o_regs_verify\'] == \'0\') ? $forum_config[\'o_default_user_group\'] : FORUM_UNVERIFIED,
-								\'salt\'					=> $salt,
-								\'password\'				=> $password,
-								\'password_hash\'			=> $password_hash,
-								\'email\'					=> $email,
-								\'email_setting\'			=> 1,
-								\'save_pass\'				=> 0,
-								\'timezone\'				=> $forum_config[\'o_default_timezone\'],
-								\'dst\'					=> 0,
-								\'language\'				=> $forum_config[\'o_default_lang\'],
-								\'style\'					=> $forum_config[\'o_default_style\'],
-								\'registered\'			=> time(),
-								\'registration_ip\'		=> get_remote_address(),
-								\'activate_key\'			=> ($forum_config[\'o_regs_verify\'] == \'1\') ? \'\\\'\'.random_key(8, true).\'\\\'\' : \'NULL\',
-								\'require_verification\'	=> ($forum_config[\'o_regs_verify\'] == \'1\'),
-								\'notify_admins\'			=> ($forum_config[\'o_regs_report\'] == \'1\')
-								),
-								$new_uid
-						);
-
-						if ($forum_user[\'language\'] != \'English\' && file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
-							require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
-						else
-							require $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
-
-						$forum_flash->add_info($lang_admin_add_user[\'User added successfully\']);
-
-						if (isset($_POST[\'edit_identity\']) && $_POST[\'edit_identity\'] == 1)
-							redirect(forum_link($forum_url[\'profile_identity\'], $new_uid), $lang_admin_add_user[\'User added successfully\']);
-
-						$ext_admin_add_user_user_added = true;
-					}
-					else
-						$ext_admin_add_user_user_added = false;
-				}
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
-			{
-				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
-					require $ext_info[\'path\'].\'/main.php\';
-				}
-				cache_pun_coloured_usergroups();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'ul_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_admin_add_user\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_admin_add_user\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_admin_add_user\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($forum_user[\'g_id\'] == FORUM_ADMIN)
-			{
-				if ($forum_user[\'language\'] != \'English\' && file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
-							require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
-						else
-							require $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
-
-				$username = \'\';
-				$email = \'\';
-				$edit_identity = \'\';
-				$result_message = \'\';
-
-				if (isset($_POST[\'add_user_form_sent\']) && $_POST[\'add_user_form_sent\'] == 1)
-				{
-					if ($ext_admin_add_user_user_added === true)
-						$result_message = \'<div class="frm-info"><p>\'.$lang_admin_add_user[\'User added successfully\'].\'/p></div>\';
-					else
-					{
-						$username = $_POST[\'req_username\'];
-						$email = $_POST[\'req_email\'];
-						$edit_identity = isset($_POST[\'edit_identity\']);
-					}
-				}
-
-				$buffer_old = ob_get_contents();
-
-				ob_end_clean();
-
-				ob_start();
-
-				$pun_add_user_form_action = $base_url.\'/userlist.php\';
-
-				// Get output buffer and insert form
-				$pos = strpos($buffer_old, \'<div class="main-foot">\');
-				echo substr($buffer_old, 0 , $pos);
-				?>
-
-				<div class="main-head">
-					<h2 class="hn"><span><?php echo $lang_admin_add_user[\'Add user\'] ?></span></h2>
-				</div>
-				<div class="main-content main-frm">
-				<?php
-
-				if (!empty($errors_add_users))
-				{
-					$error_li = array();
-					for ($err_num = 0; $err_num < count($errors_add_users); $err_num++)
-						$error_li[] = \'<li class="warn"><span>\'.$errors_add_users[$err_num].\'</span></li>\';
-
-				?>
-					<div class="ct-box error-box">
-						<h2 class="warn hn"><?php echo $lang_admin_add_user[\'There are some errors\']; ?></h2>
-						<ul class="error-list">
-						<?php echo implode("\\n\\t\\t\\t\\t\\t\\t", $error_li)."\\n" ?>
-						</ul>
-					</div>
-				<?php } ?>
-					<form class="frm-form" id="frm-adduser" action="<?php echo $pun_add_user_form_action ?>#adduser-content" method="post">
-						<div class="hidden">
-							<input type="hidden" name="csrf_token" value="<?php echo generate_form_token($pun_add_user_form_action) ?>" />
-							<input type="hidden" name="add_user_form_sent" value="1" />
-						</div>
-
-						<div class="frm-group group1">
-							<div class="sf-set set1">
-								<div class="sf-box text required">
-									<label for="add_user_username">
-										<span><?php echo $lang_admin_add_user[\'Username\'] ?></span>
-										<small>
-											<?php echo $lang_admin_add_user[\'Between 2 and 25 characters\'] ?>
-										</small>
-									</label>
-									<span class="fld-input"><input type="text" id="add_user_username" name="req_username" size="35" value="<?php echo $username ?>" maxlength="25" required /></span>
-								</div>
-							</div>
-
-							<div class="sf-set set2">
-								<div class="sf-box text required">
-									<label for="add_user_email">
-										<span><?php echo $lang_admin_add_user[\'E-mail\'] ?></span>
-										<small>
-											<?php echo $lang_admin_add_user[\'Enter a current and valid e-mail address\'] ?>
-										</small>
-									</label>
-									<span class="fld-input"><input type="text" id="add_user_email" name="req_email" size="35" value="<?php echo $email ?>" maxlength="80" required/></span>
-								</div>
-							</div>
-
-							<div class="sf-set set3">
-								<div class="sf-box checkbox">
-									<span class="fld-input"><input type="checkbox" id="add_user_edit_user_identity" name="edit_identity" value="1"<?php echo $edit_identity ? \' checked="checked"\' : \'\' ?> /></span>
-									<label for="add_user_edit_user_identity"><?php echo $lang_admin_add_user[\'Edit User Identity after adding User\'] ?></label>
-								</div>
-							</div>
-						</div>
-
-						<div class="frm-buttons">
-							<span class="submit primary"><input type="submit" name="submit" value="<?php echo $lang_admin_add_user[\'Add user\'] ?>" /></span>
-						</div>
-					</form>
-				</div>
-				<?php
-
-				echo substr($buffer_old, $pos, strlen($buffer_old) - $pos);
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'es_essentials' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_jquery\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-define(\'PUN_JQUERY_INCLUDE_METHOD_LOCAL\', 0);
-			define(\'PUN_JQUERY_INCLUDE_METHOD_GOOGLE_CDN\', 1);
-			define(\'PUN_JQUERY_INCLUDE_METHOD_MICROSOFT_CDN\', 2);
-			define(\'PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN\', 3);
-
-			define(\'PUN_JQUERY_VERSION\', \'1.7.1\');
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'aop_features_gzip_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_jquery\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!isset($lang_pun_jquery)) {
-				if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/lang.php\')) {
-					require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/lang.php\';
-				} else {
-					require $ext_info[\'path\'].\'/lang/English/lang.php\';
-				}
-			}
-
-			// Reset counter
-			$forum_page[\'group_count\'] = $forum_page[\'item_count\'] = 0;
 ?>
-			<div class="content-head">
-				<h2 class="hn"><span><?php echo sprintf($lang_pun_jquery[\'Setup jquery\'], PUN_JQUERY_VERSION) ?></span></h2>
-			</div>
+	<div class="main-subhead">
+		<h2 class="hn"><span><?php echo $lang_pun_repository[\'PunBB Repository\'] ?></span></h2>
+	</div>
+	<div class="main-content main-extensions">
+		<p class="content-options options"><a href="<?php echo $base_url ?>/admin/extensions.php?pun_repository_update&amp;csrf_token=<?php echo generate_form_token(\'pun_repository_update\') ?>"><?php echo $lang_pun_repository[\'Clear cache\'] ?></a></p>
+<?php
 
-			<fieldset class="frm-group group<?php echo ++$forum_page[\'group_count\'] ?>">
-				<legend class="group-legend"><strong><?php echo sprintf($lang_pun_jquery[\'Setup jquery legend\'], PUN_JQUERY_VERSION) ?></strong></legend>
-				<fieldset class="mf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-					<legend><span><?php echo $lang_pun_jquery[\'Include method\'] ?></span></legend>
-					<div class="mf-box">
-						<div class="mf-item">
-							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_LOCAL; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_LOCAL) echo \' checked="checked"\' ?> /></span>
-							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method local label\'] ?></label>
-						</div>
-						<div class="mf-item">
-							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_GOOGLE_CDN; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_GOOGLE_CDN) echo \' checked="checked"\' ?> /></span>
-							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method google label\'] ?></label>
-						</div>
-						<div class="mf-item">
-							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_MICROSOFT_CDN; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_MICROSOFT_CDN) echo \' checked="checked"\' ?> /></span>
-							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method microsoft label\'] ?></label>
-						</div>
-						<div class="mf-item">
-							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN) echo \' checked="checked"\' ?> /></span>
-							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method jquery label\'] ?></label>
-						</div>
-					</div>
-				</fieldset>
-			</fieldset>
+if (!defined(\'PUN_REPOSITORY_EXTENSIONS_LOADED\') && file_exists(FORUM_CACHE_DIR.\'cache_pun_repository.php\'))
+	include FORUM_CACHE_DIR.\'cache_pun_repository.php\';
 
+if (!defined(\'FORUM_EXT_VERSIONS_LOADED\') && file_exists(FORUM_CACHE_DIR.\'cache_ext_version_notifications.php\'))
+	include FORUM_CACHE_DIR.\'cache_ext_version_notifications.php\';
+
+// Regenerate cache only if automatic updates are enabled and if the cache is more than 12 hours old
+if (!defined(\'PUN_REPOSITORY_EXTENSIONS_LOADED\') || !defined(\'FORUM_EXT_VERSIONS_LOADED\') || ($pun_repository_extensions_timestamp < $forum_ext_versions_update_cache))
+{
+	$pun_repository_error = \'\';
+
+	if (pun_repository_generate_cache($pun_repository_error))
+	{
+		require FORUM_CACHE_DIR.\'cache_pun_repository.php\';
+	}
+	else
+	{
+
+		?>
+		<div class="ct-box warn-box">
+			<p class="warn"><?php echo $pun_repository_error ?></p>
+		</div>
+		<?php
+
+		// Stop processing hook
+		return;
+	}
+}
+
+$pun_repository_parsed = array();
+$pun_repository_skipped = array();
+
+// Display information about extensions in repository
+foreach ($pun_repository_extensions as $pun_repository_ext)
+{
+	// Skip installed extensions
+	if (isset($inst_exts[$pun_repository_ext[\'id\']]))
+	{
+		$pun_repository_skipped[\'installed\'][] = $pun_repository_ext[\'id\'];
+		continue;
+	}
+
+	// Skip uploaded extensions (including incorrect ones)
+	if (is_dir(FORUM_ROOT.\'extensions/\'.$pun_repository_ext[\'id\']))
+	{
+		$pun_repository_skipped[\'has_dir\'][] = $pun_repository_ext[\'id\'];
+		continue;
+	}
+
+	// Check for unresolved dependencies
+	if (isset($pun_repository_ext[\'dependencies\']))
+		$pun_repository_ext[\'dependencies\'] = pun_repository_check_dependencies($inst_exts, $pun_repository_ext[\'dependencies\']);
+
+	if (empty($pun_repository_ext[\'dependencies\'][\'unresolved\']))
+	{
+		// \'Download and install\' link
+		$pun_repository_ext[\'options\'] = array(\'<a href="\'.$base_url.\'/admin/extensions.php?pun_repository_download_and_install=\'.$pun_repository_ext[\'id\'].\'&amp;csrf_token=\'.generate_form_token(\'pun_repository_download_and_install_\'.$pun_repository_ext[\'id\']).\'">\'.$lang_pun_repository[\'Download and install\'].\'</a>\');
+	}
+	else
+		$pun_repository_ext[\'options\'] = array();
+
+	$pun_repository_parsed[] = $pun_repository_ext[\'id\'];
+
+	// Direct links to archives
+	$pun_repository_ext[\'download_links\'] = array();
+	foreach (array(\'zip\', \'tgz\', \'7z\') as $pun_repository_archive_type)
+		$pun_repository_ext[\'download_links\'][] = \'<a href="\'.PUN_REPOSITORY_URL.\'/\'.$pun_repository_ext[\'id\'].\'/\'.$pun_repository_ext[\'id\'].\'.\'.$pun_repository_archive_type.\'">\'.$pun_repository_archive_type.\'</a>\';
+
+	($hook = get_hook(\'pun_repository_pre_display_ext_info\')) ? eval($hook) : null;
+
+	// Let\'s ptint it all out
+?>
+		<div class="ct-box info-box extension available" id="<?php echo $pun_repository_ext[\'id\'] ?>">
+			<h3 class="ct-legend hn"><span><?php echo forum_htmlencode($pun_repository_ext[\'title\']).\' \'.$pun_repository_ext[\'version\'] ?></span></h3>
+			<p><?php echo forum_htmlencode($pun_repository_ext[\'description\']) ?></p>
+<?php
+
+	// List extension dependencies
+	if (!empty($pun_repository_ext[\'dependencies\'][\'dependency\']))
+		echo \'
+			<p>\', $lang_pun_repository[\'Dependencies:\'], \' \', implode(\', \', $pun_repository_ext[\'dependencies\'][\'dependency\']), \'</p>\';
+
+?>
+			<p><?php echo $lang_pun_repository[\'Direct download links:\'], \' \', implode(\' \', $pun_repository_ext[\'download_links\']) ?></p>
+<?php
+
+	// List unresolved dependencies
+	if (!empty($pun_repository_ext[\'dependencies\'][\'unresolved\']))
+		echo \'
+			<div class="ct-box warn-box">
+				<p class="warn">\', $lang_pun_repository[\'Resolve dependencies:\'], \' \', implode(\', \', array_map(create_function(\'$dep\', \'return \\\'<a href="#\\\'.$dep.\\\'">\\\'.$dep.\\\'</a>\\\';\'), $pun_repository_ext[\'dependencies\'][\'unresolved\'])), \'</p>
+			</div>\';
+
+	// Actions
+	if (!empty($pun_repository_ext[\'options\']))
+		echo \'
+			<p class="options">\', implode(\' \', $pun_repository_ext[\'options\']), \'</p>\';
+
+?>
+		</div>
+<?php
+
+}
+
+?>
+		<div class="ct-box warn-box">
+			<p class="warn"><?php echo $lang_pun_repository[\'Files mode and owner\'] ?></p>
+		</div>
+<?php
+
+if (empty($pun_repository_parsed) && (count($pun_repository_skipped[\'installed\']) > 0 || count($pun_repository_skipped[\'has_dir\']) > 0))
+{
+	($hook = get_hook(\'pun_repository_no_extensions\')) ? eval($hook) : null;
+
+	?>
+		<div class="ct-box info-box">
+			<p class="warn"><?php echo $lang_pun_repository[\'All installed or downloaded\'] ?></p>
+		</div>
+	<?php
+
+}
+
+($hook = get_hook(\'pun_repository_after_ext_list\')) ? eval($hook) : null;
+
+?>
+	</div>
 <?php
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'aop_features_validation' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_jquery\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\',
+  ),
+  'aex_new_action' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_repository\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_repository\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_repository\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
-if (isset($form[\'pun_jquery_include_method\']))
-			{
-				$form[\'pun_jquery_include_method\'] = intval($form[\'pun_jquery_include_method\'], 10);
-				if (($form[\'pun_jquery_include_method\'] < PUN_JQUERY_INCLUDE_METHOD_LOCAL) || ($form[\'pun_jquery_include_method\'] > PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN))
-				{
-					$form[\'pun_jquery_include_method\'] = PUN_JQUERY_INCLUDE_METHOD_LOCAL;
-				}
-			}
+// Clear pun_repository cache
+if (isset($_GET[\'pun_repository_update\']))
+{
+	// Validate CSRF token
+	if (!isset($_POST[\'csrf_token\']) && (!isset($_GET[\'csrf_token\']) || $_GET[\'csrf_token\'] !== generate_form_token(\'pun_repository_update\')))
+		csrf_confirm_form();
+
+	if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
+		include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
+	else
+		include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
+
+	@unlink(FORUM_CACHE_DIR.\'cache_pun_repository.php\');
+	if (file_exists(FORUM_CACHE_DIR.\'cache_pun_repository.php\'))
+		message($lang_pun_repository[\'Unable to remove cached file\'], \'\', $lang_pun_repository[\'PunBB Repository\']);
+
+	redirect($base_url.\'/admin/extensions.php?section=manage\', $lang_pun_repository[\'Cache has been successfully cleared\']);
+}
+
+if (isset($_GET[\'pun_repository_download_and_install\']))
+{
+	$ext_id = preg_replace(\'/[^0-9a-z_]/\', \'\', $_GET[\'pun_repository_download_and_install\']);
+
+	// Validate CSRF token
+	if (!isset($_POST[\'csrf_token\']) && (!isset($_GET[\'csrf_token\']) || $_GET[\'csrf_token\'] !== generate_form_token(\'pun_repository_download_and_install_\'.$ext_id)))
+		csrf_confirm_form();
+
+	// TODO: Should we check again for unresolved dependencies here?
+
+	if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
+		include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
+	else
+		include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
+
+	require_once $ext_info[\'path\'].\'/pun_repository.php\';
+
+	($hook = get_hook(\'pun_repository_download_and_install_start\')) ? eval($hook) : null;
+
+	// Download extension
+	$pun_repository_error = pun_repository_download_extension($ext_id, $ext_data);
+
+	if ($pun_repository_error == \'\')
+	{
+		if (empty($ext_data))
+			redirect($base_url.\'/admin/extensions.php?section=manage\', $lang_pun_repository[\'Incorrect manifest.xml\']);
+
+		// Validate manifest
+		$errors = validate_manifest($ext_data, $ext_id);
+		if (!empty($errors))
+			redirect($base_url.\'/admin/extensions.php?section=manage\', $lang_pun_repository[\'Incorrect manifest.xml\']);
+
+		// Everything is OK. Start installation.
+		redirect($base_url.\'/admin/extensions.php?install=\'.urlencode($ext_id), $lang_pun_repository[\'Download successful\']);
+	}
+
+	($hook = get_hook(\'pun_repository_download_and_install_end\')) ? eval($hook) : null;
+}
+
+// Handling the download and update extension action
+if (isset($_GET[\'pun_repository_download_and_update\']))
+{
+	$ext_id = preg_replace(\'/[^0-9a-z_]/\', \'\', $_GET[\'pun_repository_download_and_update\']);
+
+	// Validate CSRF token
+	if (!isset($_POST[\'csrf_token\']) && (!isset($_GET[\'csrf_token\']) || $_GET[\'csrf_token\'] !== generate_form_token(\'pun_repository_download_and_update_\'.$ext_id)))
+		csrf_confirm_form();
+
+	if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
+		include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
+	else
+		include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
+
+	require_once $ext_info[\'path\'].\'/pun_repository.php\';
+
+	$pun_repository_error = \'\';
+
+	($hook = get_hook(\'pun_repository_download_and_update_start\')) ? eval($hook) : null;
+
+	pun_repository_rm_recursive(FORUM_ROOT.\'extensions/\'.$ext_id.\'.old\');
+
+	// Check dependancies
+	$query = array(
+		\'SELECT\'	=> \'e.id\',
+		\'FROM\'		=> \'extensions AS e\',
+		\'WHERE\'		=> \'e.disabled=0 AND e.dependencies LIKE \\\'%|\'.$forum_db->escape($ext_id).\'|%\\\'\'
+	);
+
+	($hook = get_hook(\'aex_qr_get_disable_dependencies\')) ? eval($hook) : null;
+	$result = $forum_db->query_build($query) or error(__FILE__, __LINE__);
+
+	if ($forum_db->num_rows($result) != 0)
+	{
+		$dependency = $forum_db->fetch_assoc($result);
+		$pun_repository_error = sprintf($lang_admin[\'Disable dependency\'], $dependency[\'id\']);
+	}
+
+	if ($pun_repository_error == \'\' && ($ext_id != $ext_info[\'id\']))
+	{
+		// Disable extension
+		$query = array(
+			\'UPDATE\'	=> \'extensions\',
+			\'SET\'		=> \'disabled=1\',
+			\'WHERE\'		=> \'id=\\\'\'.$forum_db->escape($ext_id).\'\\\'\'
+		);
+
+		($hook = get_hook(\'aex_qr_update_disabled_status\')) ? eval($hook) : null;
+		$forum_db->query_build($query) or error(__FILE__, __LINE__);
+
+		// Regenerate the hooks cache
+		require_once FORUM_ROOT.\'include/cache.php\';
+		generate_hooks_cache();
+	}
+
+	if ($pun_repository_error == \'\')
+	{
+		if ($ext_id == $ext_info[\'id\'])
+		{
+			// Hey! That\'s me!
+			// All the necessary files should be included before renaming old directory
+			// NOTE: Self-updating is to be tested more in real-life conditions
+			if (!defined(\'PUN_REPOSITORY_TAR_EXTRACT_INCLUDED\'))
+				require $ext_info[\'path\'].\'/pun_repository_tar_extract.php\';
+		}
+
+		$pun_repository_error = pun_repository_download_extension($ext_id, $ext_data, FORUM_ROOT.\'extensions/\'.$ext_id.\'.new\'); // Download the extension
+
+		if ($pun_repository_error == \'\')
+		{
+			if (is_writable(FORUM_ROOT.\'extensions/\'.$ext_id))
+				pun_repository_dir_copy(FORUM_ROOT.\'extensions/\'.$ext_id.\'.new/\'.$ext_id, FORUM_ROOT.\'extensions/\'.$ext_id);
 			else
-			{
-				$form[\'pun_jquery_include_method\'] = PUN_JQUERY_INCLUDE_METHOD_LOCAL;
-			}
+				$pun_repository_error = sprintf($lang_pun_repository[\'Copy fail\'], FORUM_ROOT.\'extensions/\'.$ext_id);
+		}
+	}
 
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_poll\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+	if ($pun_repository_error == \'\')
+	{
+		// Do we have extension data at all? :-)
+		if (empty($ext_data))
+			$errors = array(true);
 
-if ($forum_user[\'language\'] != \'English\' && file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
-				include_once $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
-			else
-				include_once $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
+		// Validate manifest
+		if (empty($errors))
+			$errors = validate_manifest($ext_data, $ext_id);
 
+		if (!empty($errors))
+			$pun_repository_error = $lang_pun_repository[\'Incorrect manifest.xml\'];
+	}
 
-			if (!isset($form[\'pun_poll_enable_read\']) || $form[\'pun_poll_enable_read\'] != \'1\') $form[\'pun_poll_enable_read\'] = \'0\';
-			if (!isset($form[\'pun_poll_enable_revote\']) || $form[\'pun_poll_enable_revote\'] != \'1\') $form[\'pun_poll_enable_revote\'] = \'0\';
+	if ($pun_repository_error == \'\')
+	{
+		($hook = get_hook(\'pun_repository_download_and_update_ok\')) ? eval($hook) : null;
 
-			$form[\'pun_poll_max_answers\'] = intval($form[\'pun_poll_max_answers\']);
+		// Everything is OK. Start installation.
+		pun_repository_rm_recursive(FORUM_ROOT.\'extensions/\'.$ext_id.\'.new\');
+		redirect($base_url.\'/admin/extensions.php?install=\'.urlencode($ext_id), $lang_pun_repository[\'Download successful\']);
+	}
 
-			if ($form[\'pun_poll_max_answers\'] > 100)
-				$form[\'pun_poll_max_answers\'] = 100;
+	($hook = get_hook(\'pun_repository_download_and_update_error\')) ? eval($hook) : null;
 
-			if ($form[\'pun_poll_max_answers\'] < 2)
-				$form[\'pun_poll_max_answers\'] = 2;
+	// Enable extension
+	$query = array(
+		\'UPDATE\'	=> \'extensions\',
+		\'SET\'		=> \'disabled=0\',
+		\'WHERE\'		=> \'id=\\\'\'.$forum_db->escape($ext_id).\'\\\'\'
+	);
 
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        2 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+	($hook = get_hook(\'aex_qr_update_enabled_status\')) ? eval($hook) : null;
+	$forum_db->query_build($query) or error(__FILE__, __LINE__);
 
-if (!isset($form[\'pun_tags_show\']) || $form[\'pun_tags_show\'] != \'1\')
-				$form[\'pun_tags_show\'] = \'0\';
-			if (isset($form[\'pun_tags_count_in_cloud\']) && !empty($form[\'pun_tags_count_in_cloud\']) && intval($form[\'pun_tags_count_in_cloud\']) > 0)
-				$form[\'pun_tags_count_in_cloud\'] = intval($form[\'pun_tags_count_in_cloud\']);
-			else
-				$form[\'pun_tags_count_in_cloud\'] = 25;
-			if (isset($form[\'pun_tags_separator\']) && !empty($form[\'pun_tags_separator\']))
-				$form[\'pun_tags_separator\'] = $form[\'pun_tags_separator\'];
-			else
-				$form[\'pun_tags_separator\'] = \' \';
+	// Regenerate the hooks cache
+	require_once FORUM_ROOT.\'include/cache.php\';
+	generate_hooks_cache();
 
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'hd_head' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_bbcode\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+	($hook = get_hook(\'pun_repository_download_and_update_end\')) ? eval($hook) : null;
+}
 
-if ($forum_user[\'pun_bbcode_enabled\'] && ((FORUM_PAGE == \'viewtopic\' && $forum_config[\'o_quickpost\']) || in_array(FORUM_PAGE, array(\'post\', \'postedit\', \'pun_pm-write\', \'pun_pm-inbox\', \'pun_pm-compose\'))))
-			{
-				if (!defined(\'FORUM_PARSER_LOADED\'))
-					require FORUM_ROOT.\'include/parser.php\';
+// Do we have some error?
+if (!empty($pun_repository_error))
+{
+	// Setup breadcrumbs
+	$forum_page[\'crumbs\'] = array(
+		array($forum_config[\'o_board_title\'], forum_link($forum_url[\'index\'])),
+		array($lang_admin_common[\'Forum administration\'], forum_link($forum_url[\'admin_index\'])),
+		array($lang_admin_common[\'Extensions\'], forum_link($forum_url[\'admin_extensions_manage\'])),
+		array($lang_admin_common[\'Manage extensions\'], forum_link($forum_url[\'admin_extensions_manage\'])),
+		$lang_pun_repository[\'PunBB Repository\']
+	);
 
-				// Load CSS
-				if ($forum_user[\'style\'] != \'Oxygen\' && file_exists($ext_info[\'path\'].\'/css/\'.$forum_user[\'style\'].\'/pun_bbcode.min.css\'))
-					$forum_loader->add_css($ext_info[\'url\'].\'/css/\'.$forum_user[\'style\'].\'/pun_bbcode.min.css\', array(\'type\' => \'url\', \'weight\' => \'90\', \'media\' => \'screen\'));
-				else
-					$forum_loader->add_css($ext_info[\'url\'].\'/css/Oxygen/pun_bbcode.min.css\', array(\'type\' => \'url\', \'weight\' => \'90\', \'media\' => \'screen\'));
+	($hook = get_hook(\'pun_repository__pre_header_load\')) ? eval($hook) : null;
 
-				// CSS for disabled JS hide bar
-				$forum_loader->add_css(\'#pun_bbcode_bar { display: none; }\', array(\'type\' => \'inline\', \'noscript\' => true));
+	define(\'FORUM_PAGE_SECTION\', \'extensions\');
+	define(\'FORUM_PAGE\', \'admin-extensions-pun-repository\');
+	require FORUM_ROOT.\'header.php\';
 
-				// Load JS
-				$forum_loader->add_js(\'PUNBB.pun_bbcode=(function(){return{init:function(){return true;},insert_text:function(d,h){var g,f,e=(document.all)?document.all.req_message:((document.getElementById("afocus")!==null)?(document.getElementById("afocus").req_message):(document.getElementsByName("req_message")[0]));if(!e){return false;}if(document.selection&&document.selection.createRange){e.focus();g=document.selection.createRange();g.text=d+g.text+h;e.focus();}else{if(e.selectionStart||e.selectionStart===0){var c=e.selectionStart,b=e.selectionEnd,a=e.scrollTop;e.value=e.value.substring(0,c)+d+e.value.substring(c,b)+h+e.value.substring(b,e.value.length);if(d.charAt(d.length-2)==="="){e.selectionStart=(c+d.length-1);}else{if(c===b){e.selectionStart=b+d.length;}else{e.selectionStart=b+d.length+h.length;}}e.selectionEnd=e.selectionStart;e.scrollTop=a;e.focus();}else{e.value+=d+h;e.focus();}}}};}());PUNBB.common.addDOMReadyEvent(PUNBB.pun_bbcode.init);\', array(\'type\' => \'inline\'));
+	// START SUBST - <!-- forum_main -->
+	ob_start();
 
-				($hook = get_hook(\'pun_bbcode_styles_loaded\')) ? eval($hook) : null;
-			}
+	($hook = get_hook(\'pun_repository_display_error_output_start\')) ? eval($hook) : null;
 
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
-			{
-				require FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\';
-				$forum_loader->add_css($pun_colored_usergroups_cache, array(\'type\' => \'inline\', \'media\' => \'screen\'));
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        2 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (in_array(FORUM_PAGE, array(\'index\', \'viewforum\', \'viewtopic\', \'searchtopics\', \'searchposts\', \'admin-management-manage_tags\')))
-			{
-				if ($forum_user[\'style\'] != \'Oxygen\' && file_exists($ext_info[\'path\'].\'/style/\'.$forum_user[\'style\'].\'/pun_tags.css\'))
-					$forum_loader->add_css($ext_info[\'url\'].\'/style/\'.$forum_user[\'style\'].\'/pun_tags.css\', array(\'type\' => \'url\', \'media\' => \'screen\'));
-				else
-					$forum_loader->add_css($ext_info[\'url\'].\'/style/Oxygen/pun_tags.min.css\', array(\'type\' => \'url\', \'media\' => \'screen\'));
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'po_pre_post_contents' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_bbcode\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($forum_user[\'pun_bbcode_enabled\'])
-			{
-				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
-				include $ext_info[\'path\'].\'/bar.php\';
-				$pun_bbcode_bar = new Pun_bbcode;
-				$pun_bbcode_bar->render();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'vt_quickpost_pre_message_box' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_bbcode\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($forum_user[\'pun_bbcode_enabled\'])
-			{
-				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
-				include $ext_info[\'path\'].\'/bar.php\';
-				$pun_bbcode_bar = new Pun_bbcode;
-				$pun_bbcode_bar->render();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'ed_pre_message_box' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_bbcode\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($forum_user[\'pun_bbcode_enabled\'])
-			{
-				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
-				include $ext_info[\'path\'].\'/bar.php\';
-				$pun_bbcode_bar = new Pun_bbcode;
-				$pun_bbcode_bar->render();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'pun_pm_fn_send_form_pre_textarea_output' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_bbcode\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($forum_user[\'pun_bbcode_enabled\'])
-			{
-				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
-				include $ext_info[\'path\'].\'/bar.php\';
-				$pun_bbcode_bar = new Pun_bbcode;
-				$pun_bbcode_bar->render();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'pf_change_details_settings_validation' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_bbcode\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$form[\'pun_bbcode_enabled\'] = (!isset($_POST[\'form\'][\'pun_bbcode_enabled\']) || $_POST[\'form\'][\'pun_bbcode_enabled\'] != \'1\') ? \'0\' : \'1\';
-			$form[\'pun_bbcode_use_buttons\'] = (!isset($_POST[\'form\'][\'pun_bbcode_use_buttons\']) || $_POST[\'form\'][\'pun_bbcode_use_buttons\'] != \'1\') ? \'0\' : \'1\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'pf_change_details_settings_email_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_bbcode\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
-				include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
-			else
-				include $ext_info[\'path\'].\'/lang/English/pun_bbcode.php\';
-
-			$forum_page[\'item_count\'] = 0;
 ?>
-				<fieldset class="frm-group group<?php echo ++$forum_page[\'group_count\'] ?>">
-					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-						<div class="sf-box checkbox">
-							<span class="fld-input"><input type="checkbox" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_bbcode_enabled]" value="1"<?php if ($user[\'pun_bbcode_enabled\'] == \'1\') echo \' checked="checked"\' ?> /></span>
-							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_bbcode[\'Pun BBCode Bar\'] ?></span> <?php echo $lang_pun_bbcode[\'Notice BBCode Bar\'] ?></label>
-						</div>
-					</div>
-					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-						<div class="sf-box checkbox">
-							<span class="fld-input"><input type="checkbox" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_bbcode_use_buttons]" value="1"<?php if ($user[\'pun_bbcode_use_buttons\'] == \'1\') echo \' checked="checked"\' ?> /></span>
-							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_bbcode[\'BBCode Graphical buttons\'] ?></label>
-						</div>
-					</div>
-				</fieldset>
+	<div class="main-subhead">
+		<h2 class="hn"><span><?php echo $lang_pun_repository[\'PunBB Repository\'] ?></span></h2>
+	</div>
+	<div class="main-content">
+		<div class="ct-box warn-box">
+			<p class="warn"><?php echo $pun_repository_error ?></p>
+		</div>
+	</div>
 <?php
 
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'in_users_online_qr_get_online_info' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+	($hook = get_hook(\'pun_repository_display_error_pre_ob_end\')) ? eval($hook) : null;
 
-$query[\'SELECT\'] .= \', u.group_id\';
-			$query[\'JOINS\'][] = array(
-				\'LEFT JOIN\'	=> \'users AS u\',
-				\'ON\'		=> \'u.id=o.user_id\'
-			);
+	$tpl_temp = trim(ob_get_contents());
+	$tpl_main = str_replace(\'<!-- forum_main -->\', $tpl_temp, $tpl_main);
+	ob_end_clean();
+	// END SUBST - <!-- forum_main -->
+
+	require FORUM_ROOT.\'footer.php\';
+}
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'agr_add_edit_group_pre_basic_details_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_colored_usergroups.php\'))
-					include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_colored_usergroups.php\';
-			else
-					include $ext_info[\'path\'].\'/lang/English/pun_colored_usergroups.php\';
-			?>
-				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-					<div class="sf-box text required">
-						<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_colored_usergroups[\'link\'] ?></span></label><br />
-						<span class="fld-input"><input type="text" id="fld<?php echo $forum_page[\'fld_count\'] ?>" name="link_color" size="20" maxlength="20" value="<?php echo forum_htmlencode($group[\'link_color\']) ?>" /></span>
-					</div>
-					<div class="sf-box text required">
-						<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_colored_usergroups[\'hover\'] ?></span></label><br />
-						<span class="fld-input"><input type="text" id="fld<?php echo $forum_page[\'fld_count\'] ?>" name="hover_color" size="20" maxlength="20" value="<?php echo forum_htmlencode($group[\'hover_color\']) ?>" /></span>
-					</div>
-				</div>
-			<?php
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'agr_add_edit_end_validation' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$link_color = forum_trim($_POST[\'link_color\']);
-			$hover_color = forum_trim($_POST[\'hover_color\']);
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'agr_add_end_qr_add_group' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!empty($link_color))
-			{
-				$query[\'INSERT\'] .= \', link_color\';
-				$query[\'VALUES\'] .= \',\\\'\'.$forum_db->escape($link_color).\'\\\'\';
-			}
-
-			if (!empty($hover_color))
-			{
-				$query[\'INSERT\'] .= \', hover_color\';
-				$query[\'VALUES\'] .= \',\\\'\'.$forum_db->escape($hover_color).\'\\\'\';
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'agr_edit_end_qr_update_group' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!empty($link_color))
-				$query[\'SET\'] .= \', link_color = \\\'\'.$forum_db->escape($link_color).\'\\\'\';
-			else
-				$query[\'SET\'] .= \', link_color = NULL\';
-			if (!empty($hover_color))
-				$query[\'SET\'] .= \', hover_color = \\\'\'.$forum_db->escape($hover_color).\'\\\'\';
-			else
-				$query[\'SET\'] .= \', hover_color = NULL\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_poll\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$query[\'SET\'] .= \', g_poll_add=\'.((isset($_POST[\'poll_add\']) && $_POST[\'poll_add\'] == \'1\') ? 1 : 0);
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        2 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$pun_tags_allow = isset($_POST[\'pun_tags_allow\']) ? intval($_POST[\'pun_tags_allow\']) : \'0\';
-			$query[\'SET\'] .= \', g_pun_tags_allow=\'.$pun_tags_allow;
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'in_users_online_pre_online_info_output' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$users = array();
-			$result = $forum_db->query_build($query) or error(__FILE__, __LINE__);
-
-			while ($forum_user_online = $forum_db->fetch_assoc($result))
-			{
-				if ($forum_user_online[\'user_id\'] > 1)
-				{
-					$users[] = ($forum_user[\'g_view_users\'] == \'1\') ? \'<span class="group_color_\'.$forum_user_online[\'group_id\'].\'"><a href="\'.forum_link($forum_url[\'user\'], $forum_user_online[\'user_id\']).\'">\'.forum_htmlencode($forum_user_online[\'ident\']).\'</a></span>\' : forum_htmlencode($forum_user_online[\'ident\']);
-				};
-			};
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'in_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
-			{
-				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
-					require $ext_info[\'path\'].\'/main.php\';
-				}
-				cache_pun_coloured_usergroups();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'agr_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
-			{
-				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
-					require $ext_info[\'path\'].\'/main.php\';
-				}
-				cache_pun_coloured_usergroups();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'vt_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
-			{
-				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
-					require $ext_info[\'path\'].\'/main.php\';
-				}
-				cache_pun_coloured_usergroups();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'pf_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
-			{
-				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
-					require $ext_info[\'path\'].\'/main.php\';
-				}
-				cache_pun_coloured_usergroups();
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'vt_row_pre_post_ident_merge' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($cur_post[\'poster_id\'] > 1)
-				$forum_page[\'post_ident\'][\'byline\'] = \'<span class="post-byline">\'.sprintf((($cur_post[\'id\'] == $cur_topic[\'first_post_id\']) ? $lang_topic[\'Topic byline\'] : $lang_topic[\'Reply byline\']), (($forum_user[\'g_view_users\'] == \'1\') ? \'<em class="group_color_\'.$cur_post[\'g_id\'].\'"><a title="\'.sprintf($lang_topic[\'Go to profile\'], forum_htmlencode($cur_post[\'username\'])).\'" href="\'.forum_link($forum_url[\'user\'], $cur_post[\'poster_id\']).\'">\'.forum_htmlencode($cur_post[\'username\']).\'</a></em>\' : \'<strong>\'.forum_htmlencode($cur_post[\'username\']).\'</strong>\')).\'</span>\';
-			else
-				$forum_page[\'post_ident\'][\'byline\'] = \'<span class="post-byline">\'.sprintf((($cur_post[\'id\'] == $cur_topic[\'first_post_id\']) ? $lang_topic[\'Topic byline\'] : $lang_topic[\'Reply byline\']), \'<strong>\'.forum_htmlencode($cur_post[\'username\']).\'</strong>\').\'</span>\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'ul_results_row_pre_data_output' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$forum_page[\'table_row\'][\'username\'] = \'<td class="tc\'.count($forum_page[\'table_row\']).\'"><span class="group_color_\'.$user_data[\'g_id\'].\'"><a href="\'.forum_link($forum_url[\'user\'], $user_data[\'id\']).\'">\'.forum_htmlencode($user_data[\'username\']).\'</a></span></td>\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'pf_change_details_about_output_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$forum_page[\'user_ident\'][\'username\'] = \'<li class="username\'.(($user[\'realname\'] ==\'\') ? \' fn nickname\' :  \' nickname\').\'"><strong class="group_color_\'.$user[\'g_id\'].\'">\'.forum_htmlencode($user[\'username\']).\'</strong></li>\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'agr_add_edit_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_colored_usergroups\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
-				require $ext_info[\'path\'].\'/main.php\';
-			}
-			cache_pun_coloured_usergroups();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-require_once $ext_info[\'path\'].\'/functions.php\';
-			pun_tags_generate_forum_perms_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'aex_new_action' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_admin_manage_extensions_improved\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_admin_manage_extensions_improved\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_admin_manage_extensions_improved\',
@@ -1489,240 +903,7 @@ if ($section == \'manage\')
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_repository\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_repository\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_repository\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-// Clear pun_repository cache
-if (isset($_GET[\'pun_repository_update\']))
-{
-	// Validate CSRF token
-	if (!isset($_POST[\'csrf_token\']) && (!isset($_GET[\'csrf_token\']) || $_GET[\'csrf_token\'] !== generate_form_token(\'pun_repository_update\')))
-		csrf_confirm_form();
-
-	if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
-		include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
-	else
-		include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
-
-	@unlink(FORUM_CACHE_DIR.\'cache_pun_repository.php\');
-	if (file_exists(FORUM_CACHE_DIR.\'cache_pun_repository.php\'))
-		message($lang_pun_repository[\'Unable to remove cached file\'], \'\', $lang_pun_repository[\'PunBB Repository\']);
-
-	redirect($base_url.\'/admin/extensions.php?section=manage\', $lang_pun_repository[\'Cache has been successfully cleared\']);
-}
-
-if (isset($_GET[\'pun_repository_download_and_install\']))
-{
-	$ext_id = preg_replace(\'/[^0-9a-z_]/\', \'\', $_GET[\'pun_repository_download_and_install\']);
-
-	// Validate CSRF token
-	if (!isset($_POST[\'csrf_token\']) && (!isset($_GET[\'csrf_token\']) || $_GET[\'csrf_token\'] !== generate_form_token(\'pun_repository_download_and_install_\'.$ext_id)))
-		csrf_confirm_form();
-
-	// TODO: Should we check again for unresolved dependencies here?
-
-	if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
-		include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
-	else
-		include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
-
-	require_once $ext_info[\'path\'].\'/pun_repository.php\';
-
-	($hook = get_hook(\'pun_repository_download_and_install_start\')) ? eval($hook) : null;
-
-	// Download extension
-	$pun_repository_error = pun_repository_download_extension($ext_id, $ext_data);
-
-	if ($pun_repository_error == \'\')
-	{
-		if (empty($ext_data))
-			redirect($base_url.\'/admin/extensions.php?section=manage\', $lang_pun_repository[\'Incorrect manifest.xml\']);
-
-		// Validate manifest
-		$errors = validate_manifest($ext_data, $ext_id);
-		if (!empty($errors))
-			redirect($base_url.\'/admin/extensions.php?section=manage\', $lang_pun_repository[\'Incorrect manifest.xml\']);
-
-		// Everything is OK. Start installation.
-		redirect($base_url.\'/admin/extensions.php?install=\'.urlencode($ext_id), $lang_pun_repository[\'Download successful\']);
-	}
-
-	($hook = get_hook(\'pun_repository_download_and_install_end\')) ? eval($hook) : null;
-}
-
-// Handling the download and update extension action
-if (isset($_GET[\'pun_repository_download_and_update\']))
-{
-	$ext_id = preg_replace(\'/[^0-9a-z_]/\', \'\', $_GET[\'pun_repository_download_and_update\']);
-
-	// Validate CSRF token
-	if (!isset($_POST[\'csrf_token\']) && (!isset($_GET[\'csrf_token\']) || $_GET[\'csrf_token\'] !== generate_form_token(\'pun_repository_download_and_update_\'.$ext_id)))
-		csrf_confirm_form();
-
-	if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
-		include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
-	else
-		include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
-
-	require_once $ext_info[\'path\'].\'/pun_repository.php\';
-
-	$pun_repository_error = \'\';
-
-	($hook = get_hook(\'pun_repository_download_and_update_start\')) ? eval($hook) : null;
-
-	pun_repository_rm_recursive(FORUM_ROOT.\'extensions/\'.$ext_id.\'.old\');
-
-	// Check dependancies
-	$query = array(
-		\'SELECT\'	=> \'e.id\',
-		\'FROM\'		=> \'extensions AS e\',
-		\'WHERE\'		=> \'e.disabled=0 AND e.dependencies LIKE \\\'%|\'.$forum_db->escape($ext_id).\'|%\\\'\'
-	);
-
-	($hook = get_hook(\'aex_qr_get_disable_dependencies\')) ? eval($hook) : null;
-	$result = $forum_db->query_build($query) or error(__FILE__, __LINE__);
-
-	if ($forum_db->num_rows($result) != 0)
-	{
-		$dependency = $forum_db->fetch_assoc($result);
-		$pun_repository_error = sprintf($lang_admin[\'Disable dependency\'], $dependency[\'id\']);
-	}
-
-	if ($pun_repository_error == \'\' && ($ext_id != $ext_info[\'id\']))
-	{
-		// Disable extension
-		$query = array(
-			\'UPDATE\'	=> \'extensions\',
-			\'SET\'		=> \'disabled=1\',
-			\'WHERE\'		=> \'id=\\\'\'.$forum_db->escape($ext_id).\'\\\'\'
-		);
-
-		($hook = get_hook(\'aex_qr_update_disabled_status\')) ? eval($hook) : null;
-		$forum_db->query_build($query) or error(__FILE__, __LINE__);
-
-		// Regenerate the hooks cache
-		require_once FORUM_ROOT.\'include/cache.php\';
-		generate_hooks_cache();
-	}
-
-	if ($pun_repository_error == \'\')
-	{
-		if ($ext_id == $ext_info[\'id\'])
-		{
-			// Hey! That\'s me!
-			// All the necessary files should be included before renaming old directory
-			// NOTE: Self-updating is to be tested more in real-life conditions
-			if (!defined(\'PUN_REPOSITORY_TAR_EXTRACT_INCLUDED\'))
-				require $ext_info[\'path\'].\'/pun_repository_tar_extract.php\';
-		}
-
-		$pun_repository_error = pun_repository_download_extension($ext_id, $ext_data, FORUM_ROOT.\'extensions/\'.$ext_id.\'.new\'); // Download the extension
-
-		if ($pun_repository_error == \'\')
-		{
-			if (is_writable(FORUM_ROOT.\'extensions/\'.$ext_id))
-				pun_repository_dir_copy(FORUM_ROOT.\'extensions/\'.$ext_id.\'.new/\'.$ext_id, FORUM_ROOT.\'extensions/\'.$ext_id);
-			else
-				$pun_repository_error = sprintf($lang_pun_repository[\'Copy fail\'], FORUM_ROOT.\'extensions/\'.$ext_id);
-		}
-	}
-
-	if ($pun_repository_error == \'\')
-	{
-		// Do we have extension data at all? :-)
-		if (empty($ext_data))
-			$errors = array(true);
-
-		// Validate manifest
-		if (empty($errors))
-			$errors = validate_manifest($ext_data, $ext_id);
-
-		if (!empty($errors))
-			$pun_repository_error = $lang_pun_repository[\'Incorrect manifest.xml\'];
-	}
-
-	if ($pun_repository_error == \'\')
-	{
-		($hook = get_hook(\'pun_repository_download_and_update_ok\')) ? eval($hook) : null;
-
-		// Everything is OK. Start installation.
-		pun_repository_rm_recursive(FORUM_ROOT.\'extensions/\'.$ext_id.\'.new\');
-		redirect($base_url.\'/admin/extensions.php?install=\'.urlencode($ext_id), $lang_pun_repository[\'Download successful\']);
-	}
-
-	($hook = get_hook(\'pun_repository_download_and_update_error\')) ? eval($hook) : null;
-
-	// Enable extension
-	$query = array(
-		\'UPDATE\'	=> \'extensions\',
-		\'SET\'		=> \'disabled=0\',
-		\'WHERE\'		=> \'id=\\\'\'.$forum_db->escape($ext_id).\'\\\'\'
-	);
-
-	($hook = get_hook(\'aex_qr_update_enabled_status\')) ? eval($hook) : null;
-	$forum_db->query_build($query) or error(__FILE__, __LINE__);
-
-	// Regenerate the hooks cache
-	require_once FORUM_ROOT.\'include/cache.php\';
-	generate_hooks_cache();
-
-	($hook = get_hook(\'pun_repository_download_and_update_end\')) ? eval($hook) : null;
-}
-
-// Do we have some error?
-if (!empty($pun_repository_error))
-{
-	// Setup breadcrumbs
-	$forum_page[\'crumbs\'] = array(
-		array($forum_config[\'o_board_title\'], forum_link($forum_url[\'index\'])),
-		array($lang_admin_common[\'Forum administration\'], forum_link($forum_url[\'admin_index\'])),
-		array($lang_admin_common[\'Extensions\'], forum_link($forum_url[\'admin_extensions_manage\'])),
-		array($lang_admin_common[\'Manage extensions\'], forum_link($forum_url[\'admin_extensions_manage\'])),
-		$lang_pun_repository[\'PunBB Repository\']
-	);
-
-	($hook = get_hook(\'pun_repository__pre_header_load\')) ? eval($hook) : null;
-
-	define(\'FORUM_PAGE_SECTION\', \'extensions\');
-	define(\'FORUM_PAGE\', \'admin-extensions-pun-repository\');
-	require FORUM_ROOT.\'header.php\';
-
-	// START SUBST - <!-- forum_main -->
-	ob_start();
-
-	($hook = get_hook(\'pun_repository_display_error_output_start\')) ? eval($hook) : null;
-
-?>
-	<div class="main-subhead">
-		<h2 class="hn"><span><?php echo $lang_pun_repository[\'PunBB Repository\'] ?></span></h2>
-	</div>
-	<div class="main-content">
-		<div class="ct-box warn-box">
-			<p class="warn"><?php echo $pun_repository_error ?></p>
-		</div>
-	</div>
-<?php
-
-	($hook = get_hook(\'pun_repository_display_error_pre_ob_end\')) ? eval($hook) : null;
-
-	$tpl_temp = trim(ob_get_contents());
-	$tpl_main = str_replace(\'<!-- forum_main -->\', $tpl_temp, $tpl_main);
-	ob_end_clean();
-	// END SUBST - <!-- forum_main -->
-
-	require FORUM_ROOT.\'footer.php\';
-}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        2 => '$GLOBALS[\'ext_info_stack\'][] = array(
+    2 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_tags\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
@@ -1968,195 +1149,10 @@ if ($section == \'manage_tags\')
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'aex_section_manage_output_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_admin_manage_extensions_improved\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_admin_manage_extensions_improved\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_admin_manage_extensions_improved\',
-\'dependencies\'	=> array (
-\'pun_jquery\'	=> array(
-\'id\'				=> \'pun_jquery\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\'),
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$forum_page[\'fld_count\'] = 0;
-			if (isset($_POST[\'selected_extens\']))
-				$sel_extens = explode(\',\', $_POST[\'selected_extens\']);
-			else
-				$sel_extens = array();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'aex_section_manage_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_repository\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_repository\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_repository\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\'))
-	include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_repository.php\';
-else
-	include $ext_info[\'path\'].\'/lang/English/pun_repository.php\';
-
-require_once $ext_info[\'path\'].\'/pun_repository.php\';
-
-($hook = get_hook(\'pun_repository_pre_display_ext_list\')) ? eval($hook) : null;
-
-?>
-	<div class="main-subhead">
-		<h2 class="hn"><span><?php echo $lang_pun_repository[\'PunBB Repository\'] ?></span></h2>
-	</div>
-	<div class="main-content main-extensions">
-		<p class="content-options options"><a href="<?php echo $base_url ?>/admin/extensions.php?pun_repository_update&amp;csrf_token=<?php echo generate_form_token(\'pun_repository_update\') ?>"><?php echo $lang_pun_repository[\'Clear cache\'] ?></a></p>
-<?php
-
-if (!defined(\'PUN_REPOSITORY_EXTENSIONS_LOADED\') && file_exists(FORUM_CACHE_DIR.\'cache_pun_repository.php\'))
-	include FORUM_CACHE_DIR.\'cache_pun_repository.php\';
-
-if (!defined(\'FORUM_EXT_VERSIONS_LOADED\') && file_exists(FORUM_CACHE_DIR.\'cache_ext_version_notifications.php\'))
-	include FORUM_CACHE_DIR.\'cache_ext_version_notifications.php\';
-
-// Regenerate cache only if automatic updates are enabled and if the cache is more than 12 hours old
-if (!defined(\'PUN_REPOSITORY_EXTENSIONS_LOADED\') || !defined(\'FORUM_EXT_VERSIONS_LOADED\') || ($pun_repository_extensions_timestamp < $forum_ext_versions_update_cache))
-{
-	$pun_repository_error = \'\';
-
-	if (pun_repository_generate_cache($pun_repository_error))
-	{
-		require FORUM_CACHE_DIR.\'cache_pun_repository.php\';
-	}
-	else
-	{
-
-		?>
-		<div class="ct-box warn-box">
-			<p class="warn"><?php echo $pun_repository_error ?></p>
-		</div>
-		<?php
-
-		// Stop processing hook
-		return;
-	}
-}
-
-$pun_repository_parsed = array();
-$pun_repository_skipped = array();
-
-// Display information about extensions in repository
-foreach ($pun_repository_extensions as $pun_repository_ext)
-{
-	// Skip installed extensions
-	if (isset($inst_exts[$pun_repository_ext[\'id\']]))
-	{
-		$pun_repository_skipped[\'installed\'][] = $pun_repository_ext[\'id\'];
-		continue;
-	}
-
-	// Skip uploaded extensions (including incorrect ones)
-	if (is_dir(FORUM_ROOT.\'extensions/\'.$pun_repository_ext[\'id\']))
-	{
-		$pun_repository_skipped[\'has_dir\'][] = $pun_repository_ext[\'id\'];
-		continue;
-	}
-
-	// Check for unresolved dependencies
-	if (isset($pun_repository_ext[\'dependencies\']))
-		$pun_repository_ext[\'dependencies\'] = pun_repository_check_dependencies($inst_exts, $pun_repository_ext[\'dependencies\']);
-
-	if (empty($pun_repository_ext[\'dependencies\'][\'unresolved\']))
-	{
-		// \'Download and install\' link
-		$pun_repository_ext[\'options\'] = array(\'<a href="\'.$base_url.\'/admin/extensions.php?pun_repository_download_and_install=\'.$pun_repository_ext[\'id\'].\'&amp;csrf_token=\'.generate_form_token(\'pun_repository_download_and_install_\'.$pun_repository_ext[\'id\']).\'">\'.$lang_pun_repository[\'Download and install\'].\'</a>\');
-	}
-	else
-		$pun_repository_ext[\'options\'] = array();
-
-	$pun_repository_parsed[] = $pun_repository_ext[\'id\'];
-
-	// Direct links to archives
-	$pun_repository_ext[\'download_links\'] = array();
-	foreach (array(\'zip\', \'tgz\', \'7z\') as $pun_repository_archive_type)
-		$pun_repository_ext[\'download_links\'][] = \'<a href="\'.PUN_REPOSITORY_URL.\'/\'.$pun_repository_ext[\'id\'].\'/\'.$pun_repository_ext[\'id\'].\'.\'.$pun_repository_archive_type.\'">\'.$pun_repository_archive_type.\'</a>\';
-
-	($hook = get_hook(\'pun_repository_pre_display_ext_info\')) ? eval($hook) : null;
-
-	// Let\'s ptint it all out
-?>
-		<div class="ct-box info-box extension available" id="<?php echo $pun_repository_ext[\'id\'] ?>">
-			<h3 class="ct-legend hn"><span><?php echo forum_htmlencode($pun_repository_ext[\'title\']).\' \'.$pun_repository_ext[\'version\'] ?></span></h3>
-			<p><?php echo forum_htmlencode($pun_repository_ext[\'description\']) ?></p>
-<?php
-
-	// List extension dependencies
-	if (!empty($pun_repository_ext[\'dependencies\'][\'dependency\']))
-		echo \'
-			<p>\', $lang_pun_repository[\'Dependencies:\'], \' \', implode(\', \', $pun_repository_ext[\'dependencies\'][\'dependency\']), \'</p>\';
-
-?>
-			<p><?php echo $lang_pun_repository[\'Direct download links:\'], \' \', implode(\' \', $pun_repository_ext[\'download_links\']) ?></p>
-<?php
-
-	// List unresolved dependencies
-	if (!empty($pun_repository_ext[\'dependencies\'][\'unresolved\']))
-		echo \'
-			<div class="ct-box warn-box">
-				<p class="warn">\', $lang_pun_repository[\'Resolve dependencies:\'], \' \', implode(\', \', array_map(create_function(\'$dep\', \'return \\\'<a href="#\\\'.$dep.\\\'">\\\'.$dep.\\\'</a>\\\';\'), $pun_repository_ext[\'dependencies\'][\'unresolved\'])), \'</p>
-			</div>\';
-
-	// Actions
-	if (!empty($pun_repository_ext[\'options\']))
-		echo \'
-			<p class="options">\', implode(\' \', $pun_repository_ext[\'options\']), \'</p>\';
-
-?>
-		</div>
-<?php
-
-}
-
-?>
-		<div class="ct-box warn-box">
-			<p class="warn"><?php echo $lang_pun_repository[\'Files mode and owner\'] ?></p>
-		</div>
-<?php
-
-if (empty($pun_repository_parsed) && (count($pun_repository_skipped[\'installed\']) > 0 || count($pun_repository_skipped[\'has_dir\']) > 0))
-{
-	($hook = get_hook(\'pun_repository_no_extensions\')) ? eval($hook) : null;
-
-	?>
-		<div class="ct-box info-box">
-			<p class="warn"><?php echo $lang_pun_repository[\'All installed or downloaded\'] ?></p>
-		</div>
-	<?php
-
-}
-
-($hook = get_hook(\'pun_repository_after_ext_list\')) ? eval($hook) : null;
-
-?>
-	</div>
-<?php
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'aex_section_manage_pre_header_load' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'aex_section_manage_pre_header_load' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_repository\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_repository\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_repository\',
@@ -2188,10 +1184,10 @@ if (!defined(\'PUN_REPOSITORY_EXTENSIONS_LOADED\') || !defined(\'FORUM_EXT_VERSI
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'aex_section_manage_pre_ext_actions' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'aex_section_manage_pre_ext_actions' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_repository\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_repository\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_repository\',
@@ -2213,10 +1209,10 @@ if (defined(\'PUN_REPOSITORY_EXTENSIONS_LOADED\') && isset($pun_repository_exten
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'co_common' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'co_common' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_repository\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_repository\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_repository\',
@@ -2230,7 +1226,7 @@ $pun_extensions_used = array_merge(isset($pun_extensions_used) ? $pun_extensions
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_tags\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
@@ -2268,10 +1264,1859 @@ if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'es_essentials' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_jquery\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+define(\'PUN_JQUERY_INCLUDE_METHOD_LOCAL\', 0);
+			define(\'PUN_JQUERY_INCLUDE_METHOD_GOOGLE_CDN\', 1);
+			define(\'PUN_JQUERY_INCLUDE_METHOD_MICROSOFT_CDN\', 2);
+			define(\'PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN\', 3);
+
+			define(\'PUN_JQUERY_VERSION\', \'1.7.1\');
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'aop_features_gzip_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_jquery\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!isset($lang_pun_jquery)) {
+				if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/lang.php\')) {
+					require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/lang.php\';
+				} else {
+					require $ext_info[\'path\'].\'/lang/English/lang.php\';
+				}
+			}
+
+			// Reset counter
+			$forum_page[\'group_count\'] = $forum_page[\'item_count\'] = 0;
+?>
+			<div class="content-head">
+				<h2 class="hn"><span><?php echo sprintf($lang_pun_jquery[\'Setup jquery\'], PUN_JQUERY_VERSION) ?></span></h2>
+			</div>
+
+			<fieldset class="frm-group group<?php echo ++$forum_page[\'group_count\'] ?>">
+				<legend class="group-legend"><strong><?php echo sprintf($lang_pun_jquery[\'Setup jquery legend\'], PUN_JQUERY_VERSION) ?></strong></legend>
+				<fieldset class="mf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+					<legend><span><?php echo $lang_pun_jquery[\'Include method\'] ?></span></legend>
+					<div class="mf-box">
+						<div class="mf-item">
+							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_LOCAL; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_LOCAL) echo \' checked="checked"\' ?> /></span>
+							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method local label\'] ?></label>
+						</div>
+						<div class="mf-item">
+							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_GOOGLE_CDN; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_GOOGLE_CDN) echo \' checked="checked"\' ?> /></span>
+							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method google label\'] ?></label>
+						</div>
+						<div class="mf-item">
+							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_MICROSOFT_CDN; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_MICROSOFT_CDN) echo \' checked="checked"\' ?> /></span>
+							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method microsoft label\'] ?></label>
+						</div>
+						<div class="mf-item">
+							<span class="fld-input"><input type="radio" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_jquery_include_method]" value="<?php echo PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN; ?>"<?php if ($forum_config[\'o_pun_jquery_include_method\'] == PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN) echo \' checked="checked"\' ?> /></span>
+							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_jquery[\'Include method jquery label\'] ?></label>
+						</div>
+					</div>
+				</fieldset>
+			</fieldset>
+
+<?php
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'aop_features_validation' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_jquery\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (isset($form[\'pun_jquery_include_method\']))
+			{
+				$form[\'pun_jquery_include_method\'] = intval($form[\'pun_jquery_include_method\'], 10);
+				if (($form[\'pun_jquery_include_method\'] < PUN_JQUERY_INCLUDE_METHOD_LOCAL) || ($form[\'pun_jquery_include_method\'] > PUN_JQUERY_INCLUDE_METHOD_JQUERY_CDN))
+				{
+					$form[\'pun_jquery_include_method\'] = PUN_JQUERY_INCLUDE_METHOD_LOCAL;
+				}
+			}
+			else
+			{
+				$form[\'pun_jquery_include_method\'] = PUN_JQUERY_INCLUDE_METHOD_LOCAL;
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!isset($form[\'pun_tags_show\']) || $form[\'pun_tags_show\'] != \'1\')
+				$form[\'pun_tags_show\'] = \'0\';
+			if (isset($form[\'pun_tags_count_in_cloud\']) && !empty($form[\'pun_tags_count_in_cloud\']) && intval($form[\'pun_tags_count_in_cloud\']) > 0)
+				$form[\'pun_tags_count_in_cloud\'] = intval($form[\'pun_tags_count_in_cloud\']);
+			else
+				$form[\'pun_tags_count_in_cloud\'] = 25;
+			if (isset($form[\'pun_tags_separator\']) && !empty($form[\'pun_tags_separator\']))
+				$form[\'pun_tags_separator\'] = $form[\'pun_tags_separator\'];
+			else
+				$form[\'pun_tags_separator\'] = \' \';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    2 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_poll\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($forum_user[\'language\'] != \'English\' && file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
+				include_once $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
+			else
+				include_once $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
+
+
+			if (!isset($form[\'pun_poll_enable_read\']) || $form[\'pun_poll_enable_read\'] != \'1\') $form[\'pun_poll_enable_read\'] = \'0\';
+			if (!isset($form[\'pun_poll_enable_revote\']) || $form[\'pun_poll_enable_revote\'] != \'1\') $form[\'pun_poll_enable_revote\'] = \'0\';
+
+			$form[\'pun_poll_max_answers\'] = intval($form[\'pun_poll_max_answers\']);
+
+			if ($form[\'pun_poll_max_answers\'] > 100)
+				$form[\'pun_poll_max_answers\'] = 100;
+
+			if ($form[\'pun_poll_max_answers\'] < 2)
+				$form[\'pun_poll_max_answers\'] = 2;
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'aex_section_manage_output_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_admin_manage_extensions_improved\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_admin_manage_extensions_improved\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_admin_manage_extensions_improved\',
+\'dependencies\'	=> array (
+\'pun_jquery\'	=> array(
+\'id\'				=> \'pun_jquery\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_jquery\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_jquery\'),
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$forum_page[\'fld_count\'] = 0;
+			if (isset($_POST[\'selected_extens\']))
+				$sel_extens = explode(\',\', $_POST[\'selected_extens\']);
+			else
+				$sel_extens = array();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_add_edit_group_flood_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+?>
+				<div class="content-head">
+					<h3 class="hn"><span><?php echo $lang_pun_tags[\'Permissions\']; ?></span></h3>
+				</div>
+				<fieldset class="mf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+					<legend><span><?php echo $lang_pun_tags[\'Create tags perms\']; ?></span></legend>
+					<div class="mf-box">
+						<div class="mf-item">
+							<span class="fld-input"><input type="checkbox" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="pun_tags_allow" value="1"<?php if ($group[\'g_pun_tags_allow\'] == \'1\') echo \' checked="checked"\' ?> /></span>
+						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_tags[\'Name check\']; ?></label>
+						</div>
+					</div>
+				</fieldset>
+			<?php
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_edit_end_qr_update_group' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$pun_tags_allow = isset($_POST[\'pun_tags_allow\']) ? intval($_POST[\'pun_tags_allow\']) : \'0\';
+			$query[\'SET\'] .= \', g_pun_tags_allow=\'.$pun_tags_allow;
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!empty($link_color))
+				$query[\'SET\'] .= \', link_color = \\\'\'.$forum_db->escape($link_color).\'\\\'\';
+			else
+				$query[\'SET\'] .= \', link_color = NULL\';
+			if (!empty($hover_color))
+				$query[\'SET\'] .= \', hover_color = \\\'\'.$forum_db->escape($hover_color).\'\\\'\';
+			else
+				$query[\'SET\'] .= \', hover_color = NULL\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    2 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_poll\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$query[\'SET\'] .= \', g_poll_add=\'.((isset($_POST[\'poll_add\']) && $_POST[\'poll_add\'] == \'1\') ? 1 : 0);
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'hd_main_elements' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+//Output of search results
+			if ($forum_config[\'o_pun_tags_show\'] == \'1\' && in_array(FORUM_PAGE, array(\'index\', \'viewforum\', \'viewtopic\', \'searchtopics\', \'searchposts\')))
+			{
+				$output_results = array();
+				switch (FORUM_PAGE)
+				{
+					case \'index\':
+						if (isset($pun_tags[\'forums\']))
+						{
+							foreach ($pun_tags[\'forums\'] as $forum_id => $tags_list)
+							{
+								//Can user read this forum?
+								if (in_array($forum_id, $pun_tags_groups_perms[$forum_user[\'group_id\']]))
+								{
+									foreach ($tags_list as $tag_id => $tag_weight)
+										if (!isset($output_results[$tag_id]))
+											$output_results[$tag_id] = array(\'tag\' => $pun_tags[\'index\'][$tag_id], \'weight\' => $tag_weight);
+										else
+											$output_results[$tag_id][\'weight\'] += $tag_weight;
+								}
+							}
+						}
+						break;
+
+					case \'viewforum\':
+						if (isset($pun_tags[\'forums\'][$id]))
+						{
+							foreach ($pun_tags[\'forums\'][$id] as $tag_id => $tag_weight)
+							{
+								$output_results[$tag_id] = array(\'tag\' => $pun_tags[\'index\'][$tag_id], \'weight\' => $tag_weight);
+								//Determine tag weight
+								foreach ($pun_tags[\'forums\'] as $forum_id => $tags_list)
+									if ($forum_id != $id && in_array($forum_id, $pun_tags_groups_perms[$forum_user[\'group_id\']]) && in_array($tag_id, array_keys($tags_list)))
+										$output_results[$tag_id][\'weight\'] += $tags_list[$tag_id];
+							}
+						}
+						break;
+
+					case \'viewtopic\':
+						if (isset($pun_tags[\'topics\'][$id]))
+						{
+							foreach ($pun_tags[\'topics\'][$id] as $tag_id)
+							{
+								$output_results[$tag_id] = array(\'tag\' => $pun_tags[\'index\'][$tag_id], \'weight\' => $pun_tags[\'forums\'][$cur_topic[\'forum_id\']][$tag_id]);
+								//Determine tag weight
+								foreach ($pun_tags[\'forums\'] as $forum_id => $tags_list)
+									if ($forum_id != $cur_topic[\'forum_id\'] && in_array($forum_id, $pun_tags_groups_perms[$forum_user[\'group_id\']]) && in_array($tag_id, array_keys($tags_list)))
+										$output_results[$tag_id][\'weight\'] += $tags_list[$tag_id];
+							}
+						}
+						break;
+
+					case \'searchtopics\':
+					case \'searchposts\':
+						//This string will be replaced after getting search results
+						$main_elements[\'<!-- forum_crumbs_end -->\'] .= \'<div id="brd-pun_tags"></div>\';
+						break;
+				}
+
+				if (!empty($output_results))
+				{
+					$minfontsize = 100;
+					$maxfontsize = 200;
+					list($min_pop, $max_pop) = min_max_tags_weights($output_results);
+					if ($max_pop - $min_pop == 0)
+						$step = $maxfontsize - $minfontsize;
+					else
+						$step = ($maxfontsize - $minfontsize) / ($max_pop - $min_pop);
+
+					uasort($output_results, \'compare_tags\');
+					$output_results = array_tags_slice($output_results);
+					$results = array();
+					foreach ($output_results as $tag_id => $tag_info)
+					{
+						$results[] = pun_tags_get_link(round(($tag_info[\'weight\'] - $min_pop) * $step + $minfontsize), $tag_id, $tag_info[\'weight\'], $tag_info[\'tag\']);
+					}
+					$main_elements[\'<!-- forum_crumbs_end -->\'] .= \'<div id="brd-pun_tags"><ul>\'.implode($forum_config[\'o_pun_tags_separator\'], $results).\'</ul></div>\';
+					unset($minfontsize, $maxfontsize, $step, $results, $min_pop, $max_pop);
+				}
+				unset($output_results, $tags_weights);
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'co_modify_url_scheme' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (file_exists($ext_info[\'path\'].\'/url/\'.$forum_config[\'o_sef\'].\'.php\'))
+				require $ext_info[\'path\'].\'/url/\'.$forum_config[\'o_sef\'].\'.php\';
+			else
+				require $ext_info[\'path\'].\'/url/Default.php\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  're_rewrite_rules' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$forum_rewrite_rules[\'/^tag[\\/_-]?([0-9]+)(\\.html?|\\/)?$/i\'] = \'search.php?action=tag&tag_id=$1\';
+			$forum_rewrite_rules[\'/^tag[\\/_-]?([0-9]+)[\\/_-]p(age)?[\\/_-]?([0-9]+)(\\.html?|\\/)?$/i\'] = \'search.php?action=tag&tag_id=$1&p=$3\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'se_results_pre_header_load' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($action == \'tag\')
+			{
+				// Regenerate paging links
+				$tag_id = isset($_GET[\'tag_id\']) ? intval($_GET[\'tag_id\']) : 0;
+				if ($tag_id >= 1)
+					$forum_page[\'page_post\'][\'paging\'] = \'<p class="paging"><span class="pages">\'.$lang_common[\'Pages\'].\'</span> \'.paginate($forum_page[\'num_pages\'], $forum_page[\'page\'], $forum_url[\'search_tag\'], $lang_common[\'Paging separator\'], $tag_id).\'</p>\';
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'aop_features_avatars_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+?>
+			<div class="content-head">
+				<h2 class="hn">
+					<span><?php echo $lang_pun_tags[\'Pun Tags\']; ?></span>
+				</h2>
+			</div>
+			<fieldset class="frm-group group1">
+				<legend class="group-legend">
+					<span><?php echo $lang_pun_tags[\'Settings\']; ?></span>
+				</legend>
+				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+					<div class="sf-box checkbox">
+						<span class="fld-input">
+							<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="checkbox" <?php if ($forum_config[\'o_pun_tags_show\'] == \'1\') echo \' checked="checked"\' ?> value="1" name="form[pun_tags_show]"/>
+						</span>
+						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>">
+							<span><?php echo $lang_pun_tags[\'Show Pun Tags\']; ?></span>
+							<?php echo $lang_pun_tags[\'Pun Tags notice\']; ?>
+						</label>
+					</div>
+				</div>
+				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+					<div class="sf-box text">
+						<span class="fld-input">
+							<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="text" value="<?php echo $forum_config[\'o_pun_tags_count_in_cloud\']; ?>" maxlength="6" size="6" name="form[pun_tags_count_in_cloud]"/>
+						</span>
+						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>">
+							<span><?php echo $lang_pun_tags[\'Tags count\']; ?></span>
+							<small><?php echo $lang_pun_tags[\'Tags count info\']; ?></small>
+						</label>
+					</div>
+				</div>
+				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+					<div class="sf-box text">
+						<span class="fld-input">
+							<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="text" value="<?php echo $forum_config[\'o_pun_tags_separator\']; ?>" maxlength="10" size="6" name="form[pun_tags_separator]"/>
+						</span>
+						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>">
+							<span><?php echo $lang_pun_tags[\'Separator\']; ?></span>
+							<small><?php echo $lang_pun_tags[\'Separator info\']; ?></small>
+						</label>
+					</div>
+				</div>
+			</fieldset>
+			<?php
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_poll\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+?>
+				<div class="content-head">
+					<h2 class="hn"><span><?php echo $lang_pun_poll[\'Name plugin\'] ?></span></h2>
+				</div>
+				<fieldset class="frm-group group1">
+					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+						<div class="sf-box checkbox">
+							<span class="fld-input">
+								<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="checkbox" name="form[pun_poll_enable_revote]" value="1"<?php if ($forum_config[\'p_pun_poll_enable_revote\'] == \'1\') echo \' checked="checked"\' ?>/>
+							</span>
+							<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>">
+								<span><?php echo $lang_pun_poll[\'Disable revoting info\'] ?></span>
+								<?php echo $lang_pun_poll[\'Disable revoting\'] ?>
+							</label>
+						</div>
+					</div>
+					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+						<div class="sf-box checkbox">
+							<span class="fld-input">
+								<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="checkbox" name="form[pun_poll_enable_read]" value="1"<?php if ($forum_config[\'p_pun_poll_enable_read\'] == \'1\') echo \' checked="checked"\' ?>/>
+							</span>
+							<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>">
+								<span><?php echo $lang_pun_poll[\'Disable see results\'] ?></span>
+								<?php echo $lang_pun_poll[\'Disable see results info\'] ?>
+							</label>
+						</div>
+					</div>
+					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+						<div class="sf-box text">
+							<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>">
+								<span><?php echo $lang_pun_poll[\'Maximum answers info\'] ?></span>
+								<small><?php echo $lang_pun_poll[\'Maximum answers\'] ?></small>
+							</label>
+							</br>
+							<span class="fld-input">
+								<input id="fld<?php echo $forum_page[\'fld_count\'] ?>" type="text" name="form[pun_poll_max_answers]" size="6" maxlength="6" value="<?php echo $forum_config[\'p_pun_poll_max_answers\'] ?>"/>
+							</span>
+						</div>
+					</div>
+				</fieldset>
+			<?php
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'hd_head' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (in_array(FORUM_PAGE, array(\'index\', \'viewforum\', \'viewtopic\', \'searchtopics\', \'searchposts\', \'admin-management-manage_tags\')))
+			{
+				if ($forum_user[\'style\'] != \'Oxygen\' && file_exists($ext_info[\'path\'].\'/style/\'.$forum_user[\'style\'].\'/pun_tags.css\'))
+					$forum_loader->add_css($ext_info[\'url\'].\'/style/\'.$forum_user[\'style\'].\'/pun_tags.css\', array(\'type\' => \'url\', \'media\' => \'screen\'));
+				else
+					$forum_loader->add_css($ext_info[\'url\'].\'/style/Oxygen/pun_tags.min.css\', array(\'type\' => \'url\', \'media\' => \'screen\'));
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
+			{
+				require FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\';
+				$forum_loader->add_css($pun_colored_usergroups_cache, array(\'type\' => \'inline\', \'media\' => \'screen\'));
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    2 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_bbcode\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($forum_user[\'pun_bbcode_enabled\'] && ((FORUM_PAGE == \'viewtopic\' && $forum_config[\'o_quickpost\']) || in_array(FORUM_PAGE, array(\'post\', \'postedit\', \'pun_pm-write\', \'pun_pm-inbox\', \'pun_pm-compose\'))))
+			{
+				if (!defined(\'FORUM_PARSER_LOADED\'))
+					require FORUM_ROOT.\'include/parser.php\';
+
+				// Load CSS
+				if ($forum_user[\'style\'] != \'Oxygen\' && file_exists($ext_info[\'path\'].\'/css/\'.$forum_user[\'style\'].\'/pun_bbcode.min.css\'))
+					$forum_loader->add_css($ext_info[\'url\'].\'/css/\'.$forum_user[\'style\'].\'/pun_bbcode.min.css\', array(\'type\' => \'url\', \'weight\' => \'90\', \'media\' => \'screen\'));
+				else
+					$forum_loader->add_css($ext_info[\'url\'].\'/css/Oxygen/pun_bbcode.min.css\', array(\'type\' => \'url\', \'weight\' => \'90\', \'media\' => \'screen\'));
+
+				// CSS for disabled JS hide bar
+				$forum_loader->add_css(\'#pun_bbcode_bar { display: none; }\', array(\'type\' => \'inline\', \'noscript\' => true));
+
+				// Load JS
+				$forum_loader->add_js(\'PUNBB.pun_bbcode=(function(){return{init:function(){return true;},insert_text:function(d,h){var g,f,e=(document.all)?document.all.req_message:((document.getElementById("afocus")!==null)?(document.getElementById("afocus").req_message):(document.getElementsByName("req_message")[0]));if(!e){return false;}if(document.selection&&document.selection.createRange){e.focus();g=document.selection.createRange();g.text=d+g.text+h;e.focus();}else{if(e.selectionStart||e.selectionStart===0){var c=e.selectionStart,b=e.selectionEnd,a=e.scrollTop;e.value=e.value.substring(0,c)+d+e.value.substring(c,b)+h+e.value.substring(b,e.value.length);if(d.charAt(d.length-2)==="="){e.selectionStart=(c+d.length-1);}else{if(c===b){e.selectionStart=b+d.length;}else{e.selectionStart=b+d.length+h.length;}}e.selectionEnd=e.selectionStart;e.scrollTop=a;e.focus();}else{e.value+=d+h;e.focus();}}}};}());PUNBB.common.addDOMReadyEvent(PUNBB.pun_bbcode.init);\', array(\'type\' => \'inline\'));
+
+				($hook = get_hook(\'pun_bbcode_styles_loaded\')) ? eval($hook) : null;
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'po_end_validation' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!empty($_POST[\'pun_tags\']) && $forum_user[\'g_pun_tags_allow\'])
+				$new_tags = pun_tags_parse_string(utf8_trim($_POST[\'pun_tags\']));
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_poll\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($fid && isset($_POST[\'update_poll\']) && empty($errors))	{
+				$new_poll_ans_count = isset($_POST[\'poll_ans_count\']) && intval($_POST[\'poll_ans_count\']) > 0 ? intval($_POST[\'poll_ans_count\']) : FALSE;
+
+				if (!$new_poll_ans_count)
+					$errors[] = $lang_pun_poll[\'Empty option count\'];
+
+				if ($new_poll_ans_count < 2)
+				{
+					$errors[] = $lang_pun_poll[\'Min cnt options\'];
+					$new_poll_ans_count = 2;
+				}
+
+				if ($new_poll_ans_count > $forum_config[\'p_pun_poll_max_answers\'])
+				{
+					$errors[] = sprintf($lang_pun_poll[\'Max cnt options\'], $forum_config[\'p_pun_poll_max_answers\']);
+					$new_poll_ans_count = $forum_config[\'p_pun_poll_max_answers\'];
+				}
+
+				$_POST[\'preview\'] = \'pun_poll\';
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'mr_confirm_split_posts_form_submitted' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!empty($_POST[\'pun_tags\']) && $forum_user[\'g_pun_tags_allow\'])
+				$new_tags = pun_tags_parse_string(utf8_trim($_POST[\'pun_tags\']));
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'fn_add_topic_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+global $new_tags, $pun_tags, $forum_user;
+
+			// Add tags to DB
+			if (!empty($new_tags) && $forum_user[\'g_pun_tags_allow\'])
+			{
+				$search_arr = isset($pun_tags[\'index\']) ? $pun_tags[\'index\'] : array();
+				foreach ($new_tags as $pun_tag)
+				{
+					$tag_id = array_search($pun_tag, $search_arr);
+					if ($tag_id !== FALSE)
+						pun_tags_add_existing_tag($tag_id, $new_tid);
+					else
+						pun_tags_add_new($pun_tag, $new_tid);
+				}
+				pun_tags_generate_cache();
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'mr_confirm_split_posts_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!empty($new_tags) && $forum_user[\'g_pun_tags_allow\'])
+			{
+				foreach ($new_tags as $pun_tag)
+					pun_tags_add_new($pun_tag, $new_tid);
+				pun_tags_generate_cache();
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'fn_delete_topic_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+// Remove topic tags
+			pun_tags_remove_topic_tags($topic_id);
+			pun_tags_remove_orphans();
+			pun_tags_generate_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ed_pre_post_edited' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($can_edit_subject && $forum_user[\'g_pun_tags_allow\'])
+			{
+				//Parse the string
+				if (isset($_POST[\'pun_tags\']))
+					$new_tags = pun_tags_parse_string(utf8_trim($_POST[\'pun_tags\']));
+				if (empty($new_tags))
+				{
+					if (isset($pun_tags[\'topics\'][$cur_post[\'tid\']]))
+					{
+						pun_tags_remove_topic_tags($cur_post[\'tid\']);
+						$update_cache = TRUE;
+					}
+				}
+				else
+				{
+					//Determine old tags
+					$old_tags = array();
+					if (!empty($pun_tags[\'topics\'][$cur_post[\'tid\']]))
+					{
+						foreach ($pun_tags[\'topics\'][$cur_post[\'tid\']] as $old_tagid)
+							$old_tags[$old_tagid] = $pun_tags[\'index\'][$old_tagid];
+					}
+
+					//Tags for removing
+					$remove_tags = array_diff($old_tags, $new_tags);
+					if (!empty($remove_tags))
+					{
+						$pun_tags_query = array(
+							\'DELETE\'	=>	\'topic_tags\',
+							\'WHERE\'		=>	\'topic_id = \'.$cur_post[\'tid\'].\' AND tag_id IN (\'.implode(\',\', array_keys($remove_tags)).\')\'
+						);
+						$forum_db->query_build($pun_tags_query) or error(__FILE__, __LINE__);
+						$update_cache = TRUE;
+					}
+
+					$search_arr = isset($pun_tags[\'index\']) ? $pun_tags[\'index\'] : array();
+					foreach ($new_tags as $tag)
+					{
+						//Have we current tag?
+						if (in_array($tag, $old_tags))
+							continue;
+						$tag_id = array_search($tag, $search_arr);
+						if ($tag_id === FALSE)
+							pun_tags_add_new($tag, $cur_post[\'tid\']);
+						else
+							pun_tags_add_existing_tag($tag_id, $cur_post[\'tid\']);
+						$update_cache = TRUE;
+					}
+				}
+
+				if (!empty($update_cache))
+				{
+					pun_tags_remove_orphans();
+					pun_tags_generate_cache();
+				}
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ca_fn_prune_qr_prune_subscriptions' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$query_tags = array(
+				\'DELETE\'	=>	\'topic_tags\',
+				\'WHERE\'		=>	\'topic_id IN(\'.$topic_ids.\')\'
+			);
+			$forum_db->query_build($query_tags) or error(__FILE__, __LINE__);
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'acg_del_cat_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+pun_tags_remove_orphans();
+			pun_tags_generate_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'mr_confirm_delete_topics_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+pun_tags_remove_orphans();
+			pun_tags_generate_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'afo_del_forum_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+pun_tags_remove_orphans();
+			pun_tags_generate_cache();
+			require_once $ext_info[\'path\'].\'/functions.php\';
+			pun_tags_generate_forum_perms_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'mr_confirm_move_topics_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+pun_tags_generate_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'mr_confirm_delete_topics_qr_delete_topics' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$query_tags = array(
+				\'DELETE\'	=>	\'topic_tags\',
+				\'WHERE\'		=>	\'topic_id IN(\'.implode(\',\', $topics).\')\'
+			);
+			$forum_db->query_build($query_tags) or error(__FILE__, __LINE__);
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_poll\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$pun_poll_topic_ids = isset($topic_ids) ? $topic_ids : implode(\',\', $topics);
+			$query_poll = array(
+				\'DELETE\'	=>	\'voting\',
+				\'WHERE\'		=>	\'topic_id IN(\'.$pun_poll_topic_ids.\')\'
+			);
+			$forum_db->query_build($query_poll) or error(__FILE__, __LINE__);
+
+			$query_poll = array(
+				\'DELETE\'	=>	\'questions\',
+				\'WHERE\'		=>	\'topic_id IN(\'.$pun_poll_topic_ids.\')\'
+			);
+			$forum_db->query_build($query_poll) or error(__FILE__, __LINE__);
+
+			$query_poll = array(
+				\'DELETE\'	=>	\'answers\',
+				\'WHERE\'		=>	\'topic_id IN(\'.$pun_poll_topic_ids.\')\'
+			);
+			$forum_db->query_build($query_poll) or error(__FILE__, __LINE__);
+			unset($pun_poll_topic_ids);
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'mr_confirm_merge_topics_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$query = array(
+				\'UPDATE\'	=>	\'topic_tags\',
+				\'SET\'		=>	\'topic_id = \'.$merge_to_tid,
+				\'WHERE\'		=>	\'topic_id IN(\'.implode(\',\', $topics).\') AND topic_id != \'.$merge_to_tid
+			);
+			$forum_db->query_build($query) or error(__FILE__, __LINE__);
+			pun_tags_generate_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_poll\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (isset($question_id) && $question_id != $merge_to_tid)
+			{
+				$query_poll = array(
+					\'UPDATE\'	=>	\'questions\',
+					\'SET\'		=>	\'topic_id = \'.$merge_to_tid,
+					\'WHERE\'		=>	\'topic_id = \'.$question_id
+				);
+				$forum_db->query_build($query) or error(__FILE__, __LINE__);
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'mr_confirm_split_posts_pre_confirm_checkbox' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($fid)
+			{
+				$res_tags = array();
+				if (isset($pun_tags[\'topics\'][$tid]))
+				{
+
+					foreach ($pun_tags[\'topics\'][$tid] as $tag_id)
+						foreach ($pun_tags[\'index\'] as $tag)
+							if ($tag[\'tag_id\'] == $tag_id)
+								$res_tags[] = $tag[\'tag\'];
+				}
+
+				?>
+				<div class="sf-box text">
+						<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_tags[\'Topic tags\']; ?></span><small><?php echo $lang_pun_tags[\'Enter tags\']; ?></small></label><br />
+						<span class="fld-input"><input id="fld<?php echo $forum_page[\'fld_count\'] ?>" type="text" name="pun_tags" value="<?php if (!empty($res_tags)) echo implode(\', \', $res_tags); else echo \'\';  ?>" size="70" maxlength="100"/></span>
+				</div>
+			<?php
+
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'se_post_results_fetched' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!empty($search_set))
+			{
+				//Array with tags id
+				$tags = array();
+				//Array with processed topics
+				$processed_topics = array();
+				foreach ($search_set as $res)
+				{
+					if (!isset($pun_tags[\'topics\'][$res[\'tid\']]) || in_array($res[\'tid\'], $processed_topics))
+						continue;
+
+					$processed_topics[] = $res[\'tid\'];
+					$tags = array_merge($tags, array_diff($pun_tags[\'topics\'][$res[\'tid\']], $tags));
+				}
+				//Array with tags and weights
+				$tags_results = array();
+				if (!empty($tags))
+				{
+					//Calculation of tags weight
+					foreach ($pun_tags_groups_perms[$forum_user[\'group_id\']] as $forum_id)
+					{
+						if (!isset($pun_tags[\'forums\'][$forum_id]))
+							continue;
+						//Calcullate common keys in arrays
+						$tmp = array_intersect($tags, array_keys($pun_tags[\'forums\'][$forum_id]));
+						foreach ($tmp as $cur_tag)
+						{
+							if (!isset($tags_results[$cur_tag]))
+								$tags_results[$cur_tag] = array(\'tag\' => $pun_tags[\'index\'][$cur_tag], \'weight\' => $pun_tags[\'forums\'][$forum_id][$cur_tag]);
+							else
+								$tags_results[$cur_tag][\'weight\'] += $pun_tags[\'forums\'][$forum_id][$cur_tag];
+						}
+					}
+					unset($tmp);
+				}
+				unset($tags);
+				if (!empty($tags_results))
+				{
+					$minfontsize = 100;
+					$maxfontsize = 200;
+					list($min_pop, $max_pop) = min_max_tags_weights($tags_results);
+					if ($max_pop - $min_pop == 0)
+						$step = $maxfontsize - $minfontsize;
+					else
+						$step = ($maxfontsize - $minfontsize) / ($max_pop - $min_pop);
+
+					uasort($tags_results, \'compare_tags\');
+					$tags_results = array_tags_slice($tags_results);
+					$ouput_results = array();
+					foreach ($tags_results as $tag_id => $tag_info)
+						$ouput_results[] = pun_tags_get_link(round(($tag_info[\'weight\'] - $min_pop) * $step + $minfontsize), $tag_id, $tag_info[\'weight\'], $tag_info[\'tag\']);
+					unset($minfontsize, $maxfontsize, $step, $tags_results, $min_pop, $max_pop);
+				}
+				unset($tags_results);
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'sf_fn_generate_action_search_query_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($action == \'tag\')
+			{
+				$tag_id = isset($_GET[\'tag_id\']) ? intval($_GET[\'tag_id\']) : 0;
+				if ($tag_id < 1)
+					message($lang_common[\'Bad request\']);
+				global $pun_tags;
+				if (isset($pun_tags[\'topics\']))
+				{
+					foreach ($pun_tags[\'topics\'] as $topic_id => $tags)
+						if (in_array($tag_id, $tags))
+							$search_ids[] = $topic_id;
+					if (empty($search_ids))
+						message($lang_common[\'Bad request\']);
+				}
+				$query = array(
+					\'SELECT\'	=> \'t.id AS tid, t.poster, t.subject, t.first_post_id, t.posted, t.last_post, t.last_post_id, t.last_poster, t.num_replies, t.closed, t.sticky, t.forum_id, f.forum_name\',
+					\'FROM\'		=> \'topics AS t\',
+					\'JOINS\'		=> array(
+						array(
+							\'INNER JOIN\'	=> \'forums AS f\',
+							\'ON\'			=> \'f.id=t.forum_id\'
+						),
+						array(
+							\'LEFT JOIN\'		=> \'forum_perms AS fp\',
+							\'ON\'			=> \'(fp.forum_id=f.id AND fp.group_id=\'.$forum_user[\'g_id\'].\')\'
+						)
+					),
+					\'WHERE\'		=> \'(fp.read_forum IS NULL OR fp.read_forum=1) AND t.id IN(\'.implode(\',\', $search_ids).\')\',
+					\'ORDER BY\'	=> \'t.last_post DESC\'
+				);
+				// With "has posted" indication
+				if (!$forum_user[\'is_guest\'] && $forum_config[\'o_show_dot\'] == \'1\')
+				{
+					$subquery = array(
+						\'SELECT\'	=> \'COUNT(p.id)\',
+						\'FROM\'		=> \'posts AS p\',
+						\'WHERE\'		=> \'p.poster_id=\'.$forum_user[\'id\'].\' AND p.topic_id=t.id\'
+					);
+
+					$query[\'SELECT\'] .= \', (\'.$forum_db->query_build($subquery, true).\') AS has_posted\';
+				}
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ft_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($forum_config[\'o_pun_tags_show\'] == 1)
+			{
+				if (!empty($ouput_results))
+					$tpl_main = str_replace(\'<div id="brd-pun_tags"></div>\', \'<div id="brd-pun_tags"><ul>\'.implode($forum_config[\'o_pun_tags_separator\'], $ouput_results).\'</ul></div>\', $tpl_main);
+				else
+					$tpl_main = str_replace(\'<div id="brd-pun_tags"></div>\', \'\', $tpl_main);
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'sf_fn_validate_actions_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$valid_actions[] = \'tag\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'afo_save_forum_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+require_once $ext_info[\'path\'].\'/functions.php\';
+			pun_tags_generate_forum_perms_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'afo_revert_perms_form_submitted' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+require_once $ext_info[\'path\'].\'/functions.php\';
+			pun_tags_generate_forum_perms_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_add_edit_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+require_once $ext_info[\'path\'].\'/functions.php\';
+			pun_tags_generate_forum_perms_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
+				require $ext_info[\'path\'].\'/main.php\';
+			}
+			cache_pun_coloured_usergroups();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_del_group_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+require_once $ext_info[\'path\'].\'/functions.php\';
+			pun_tags_generate_forum_perms_cache();
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ca_fn_generate_admin_menu_new_sublink' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_tags\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
+				require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
+			else
+				require $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
+			require $ext_info[\'path\'].\'/pun_tags_url.php\';
+
+			if ((FORUM_PAGE_SECTION == \'management\') && ($forum_user[\'g_id\'] == FORUM_ADMIN))
+				$forum_page[\'admin_submenu\'][\'pun_tags_management\'] = \'<li class="\'.((FORUM_PAGE == \'admin-management-manage_tags\') ? \'active\' : \'normal\').((empty($forum_page[\'admin_menu\'])) ? \' first-item\' : \'\').\'"><a href="\'.forum_link($pun_tags_url[\'Section pun_tags\']).\'">\'.$lang_pun_tags[\'Section tags\'].\'</a></li>\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'in_users_online_qr_get_online_info' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$query[\'SELECT\'] .= \', u.group_id\';
+			$query[\'JOINS\'][] = array(
+				\'LEFT JOIN\'	=> \'users AS u\',
+				\'ON\'		=> \'u.id=o.user_id\'
+			);
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_add_edit_group_pre_basic_details_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_colored_usergroups.php\'))
+					include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/pun_colored_usergroups.php\';
+			else
+					include $ext_info[\'path\'].\'/lang/English/pun_colored_usergroups.php\';
+			?>
+				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+					<div class="sf-box text required">
+						<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_colored_usergroups[\'link\'] ?></span></label><br />
+						<span class="fld-input"><input type="text" id="fld<?php echo $forum_page[\'fld_count\'] ?>" name="link_color" size="20" maxlength="20" value="<?php echo forum_htmlencode($group[\'link_color\']) ?>" /></span>
+					</div>
+					<div class="sf-box text required">
+						<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_colored_usergroups[\'hover\'] ?></span></label><br />
+						<span class="fld-input"><input type="text" id="fld<?php echo $forum_page[\'fld_count\'] ?>" name="hover_color" size="20" maxlength="20" value="<?php echo forum_htmlencode($group[\'hover_color\']) ?>" /></span>
+					</div>
+				</div>
+			<?php
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_add_edit_end_validation' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$link_color = forum_trim($_POST[\'link_color\']);
+			$hover_color = forum_trim($_POST[\'hover_color\']);
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_add_end_qr_add_group' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!empty($link_color))
+			{
+				$query[\'INSERT\'] .= \', link_color\';
+				$query[\'VALUES\'] .= \',\\\'\'.$forum_db->escape($link_color).\'\\\'\';
+			}
+
+			if (!empty($hover_color))
+			{
+				$query[\'INSERT\'] .= \', hover_color\';
+				$query[\'VALUES\'] .= \',\\\'\'.$forum_db->escape($hover_color).\'\\\'\';
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'in_users_online_pre_online_info_output' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$users = array();
+			$result = $forum_db->query_build($query) or error(__FILE__, __LINE__);
+
+			while ($forum_user_online = $forum_db->fetch_assoc($result))
+			{
+				if ($forum_user_online[\'user_id\'] > 1)
+				{
+					$users[] = ($forum_user[\'g_view_users\'] == \'1\') ? \'<span class="group_color_\'.$forum_user_online[\'group_id\'].\'"><a href="\'.forum_link($forum_url[\'user\'], $forum_user_online[\'user_id\']).\'">\'.forum_htmlencode($forum_user_online[\'ident\']).\'</a></span>\' : forum_htmlencode($forum_user_online[\'ident\']);
+				};
+			};
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'in_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
+			{
+				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
+					require $ext_info[\'path\'].\'/main.php\';
+				}
+				cache_pun_coloured_usergroups();
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'agr_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
+			{
+				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
+					require $ext_info[\'path\'].\'/main.php\';
+				}
+				cache_pun_coloured_usergroups();
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'vt_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
+			{
+				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
+					require $ext_info[\'path\'].\'/main.php\';
+				}
+				cache_pun_coloured_usergroups();
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ul_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
+			{
+				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
+					require $ext_info[\'path\'].\'/main.php\';
+				}
+				cache_pun_coloured_usergroups();
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+    1 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_admin_add_user\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_admin_add_user\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_admin_add_user\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($forum_user[\'g_id\'] == FORUM_ADMIN)
+			{
+				$errors_add_users = array();
+				if (isset($_POST[\'add_user_form_sent\']) && $_POST[\'add_user_form_sent\'] == 1)
+				{
+					$forum_extension[\'admin_add_user\'][\'user_added\'] = false;
+
+					require_once FORUM_ROOT.\'include/functions.php\';
+					require_once FORUM_ROOT.\'lang/\'.$forum_user[\'language\'].\'/profile.php\';
+
+					$username = trim($_POST[\'req_username\']);
+					$email = strtolower(trim($_POST[\'req_email\']));
+
+					// Validate the username
+					$errors_add_users = validate_username($username);
+
+					// ... and the e-mail address
+					require_once FORUM_ROOT.\'include/email.php\';
+
+					if (!is_valid_email($email))
+					   $errors_add_users[] = $lang_common[\'Invalid e-mail\'];
+
+					// Check if it\'s a banned e-mail address
+					$banned_email = is_banned_email($email);
+					if ($banned_email && $forum_config[\'p_allow_banned_email\'] == \'0\')
+						$errors_add_users[] = $lang_profile[\'Banned e-mail\'];
+
+					// Check if someone else already has registered with that e-mail address
+					$q = array(
+						\'SELECT\'	=> \'COUNT(u.username)\',
+						\'FROM\'	  	=> \'users AS u\',
+						\'WHERE\'		=> \'u.email=\\\'\'.$forum_db->escape($email).\'\\\'\'
+					);
+
+					$result = $forum_db->query_build( $q ) or error(__FILE__, __LINE__);
+
+					if (($forum_config[\'p_allow_dupe_email\'] == \'0\') && ($forum_db->result($result) > 0))
+						$errors_add_users[] = $lang_profile[\'Dupe e-mail\'];
+
+					if (empty($errors_add_users))
+					{
+						$salt = random_key(12);
+						$password = random_key(8, true);
+						$password_hash = sha1($salt.sha1($password));
+
+						$errors = add_user(
+							array(
+								\'username\'				=> $username,
+								\'group_id\'				=> ($forum_config[\'o_regs_verify\'] == \'0\') ? $forum_config[\'o_default_user_group\'] : FORUM_UNVERIFIED,
+								\'salt\'					=> $salt,
+								\'password\'				=> $password,
+								\'password_hash\'			=> $password_hash,
+								\'email\'					=> $email,
+								\'email_setting\'			=> 1,
+								\'save_pass\'				=> 0,
+								\'timezone\'				=> $forum_config[\'o_default_timezone\'],
+								\'dst\'					=> 0,
+								\'language\'				=> $forum_config[\'o_default_lang\'],
+								\'style\'					=> $forum_config[\'o_default_style\'],
+								\'registered\'			=> time(),
+								\'registration_ip\'		=> get_remote_address(),
+								\'activate_key\'			=> ($forum_config[\'o_regs_verify\'] == \'1\') ? \'\\\'\'.random_key(8, true).\'\\\'\' : \'NULL\',
+								\'require_verification\'	=> ($forum_config[\'o_regs_verify\'] == \'1\'),
+								\'notify_admins\'			=> ($forum_config[\'o_regs_report\'] == \'1\')
+								),
+								$new_uid
+						);
+
+						if ($forum_user[\'language\'] != \'English\' && file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
+							require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
+						else
+							require $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
+
+						$forum_flash->add_info($lang_admin_add_user[\'User added successfully\']);
+
+						if (isset($_POST[\'edit_identity\']) && $_POST[\'edit_identity\'] == 1)
+							redirect(forum_link($forum_url[\'profile_identity\'], $new_uid), $lang_admin_add_user[\'User added successfully\']);
+
+						$ext_admin_add_user_user_added = true;
+					}
+					else
+						$ext_admin_add_user_user_added = false;
+				}
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'pf_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if (!file_exists(FORUM_CACHE_DIR.\'cache_pun_coloured_usergroups.php\'))
+			{
+				if (!defined(\'CACHE_PUN_COLOURED_USERGROUPS_LOADED\')) {
+					require $ext_info[\'path\'].\'/main.php\';
+				}
+				cache_pun_coloured_usergroups();
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'vt_row_pre_post_ident_merge' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($cur_post[\'poster_id\'] > 1)
+				$forum_page[\'post_ident\'][\'byline\'] = \'<span class="post-byline">\'.sprintf((($cur_post[\'id\'] == $cur_topic[\'first_post_id\']) ? $lang_topic[\'Topic byline\'] : $lang_topic[\'Reply byline\']), (($forum_user[\'g_view_users\'] == \'1\') ? \'<em class="group_color_\'.$cur_post[\'g_id\'].\'"><a title="\'.sprintf($lang_topic[\'Go to profile\'], forum_htmlencode($cur_post[\'username\'])).\'" href="\'.forum_link($forum_url[\'user\'], $cur_post[\'poster_id\']).\'">\'.forum_htmlencode($cur_post[\'username\']).\'</a></em>\' : \'<strong>\'.forum_htmlencode($cur_post[\'username\']).\'</strong>\')).\'</span>\';
+			else
+				$forum_page[\'post_ident\'][\'byline\'] = \'<span class="post-byline">\'.sprintf((($cur_post[\'id\'] == $cur_topic[\'first_post_id\']) ? $lang_topic[\'Topic byline\'] : $lang_topic[\'Reply byline\']), \'<strong>\'.forum_htmlencode($cur_post[\'username\']).\'</strong>\').\'</span>\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ul_results_row_pre_data_output' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$forum_page[\'table_row\'][\'username\'] = \'<td class="tc\'.count($forum_page[\'table_row\']).\'"><span class="group_color_\'.$user_data[\'g_id\'].\'"><a href="\'.forum_link($forum_url[\'user\'], $user_data[\'id\']).\'">\'.forum_htmlencode($user_data[\'username\']).\'</a></span></td>\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'pf_change_details_about_output_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_colored_usergroups\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_colored_usergroups\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_colored_usergroups\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+$forum_page[\'user_ident\'][\'username\'] = \'<li class="username\'.(($user[\'realname\'] ==\'\') ? \' fn nickname\' :  \' nickname\').\'"><strong class="group_color_\'.$user[\'g_id\'].\'">\'.forum_htmlencode($user[\'username\']).\'</strong></li>\';
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ul_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_admin_add_user\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_admin_add_user\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_admin_add_user\',
+\'dependencies\'	=> array (
+)
+);
+$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+
+if ($forum_user[\'g_id\'] == FORUM_ADMIN)
+			{
+				if ($forum_user[\'language\'] != \'English\' && file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
+							require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
+						else
+							require $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
+
+				$username = \'\';
+				$email = \'\';
+				$edit_identity = \'\';
+				$result_message = \'\';
+
+				if (isset($_POST[\'add_user_form_sent\']) && $_POST[\'add_user_form_sent\'] == 1)
+				{
+					if ($ext_admin_add_user_user_added === true)
+						$result_message = \'<div class="frm-info"><p>\'.$lang_admin_add_user[\'User added successfully\'].\'/p></div>\';
+					else
+					{
+						$username = $_POST[\'req_username\'];
+						$email = $_POST[\'req_email\'];
+						$edit_identity = isset($_POST[\'edit_identity\']);
+					}
+				}
+
+				$buffer_old = ob_get_contents();
+
+				ob_end_clean();
+
+				ob_start();
+
+				$pun_add_user_form_action = $base_url.\'/userlist.php\';
+
+				// Get output buffer and insert form
+				$pos = strpos($buffer_old, \'<div class="main-foot">\');
+				echo substr($buffer_old, 0 , $pos);
+				?>
+
+				<div class="main-head">
+					<h2 class="hn"><span><?php echo $lang_admin_add_user[\'Add user\'] ?></span></h2>
+				</div>
+				<div class="main-content main-frm">
+				<?php
+
+				if (!empty($errors_add_users))
+				{
+					$error_li = array();
+					for ($err_num = 0; $err_num < count($errors_add_users); $err_num++)
+						$error_li[] = \'<li class="warn"><span>\'.$errors_add_users[$err_num].\'</span></li>\';
+
+				?>
+					<div class="ct-box error-box">
+						<h2 class="warn hn"><?php echo $lang_admin_add_user[\'There are some errors\']; ?></h2>
+						<ul class="error-list">
+						<?php echo implode("\\n\\t\\t\\t\\t\\t\\t", $error_li)."\\n" ?>
+						</ul>
+					</div>
+				<?php } ?>
+					<form class="frm-form" id="frm-adduser" action="<?php echo $pun_add_user_form_action ?>#adduser-content" method="post">
+						<div class="hidden">
+							<input type="hidden" name="csrf_token" value="<?php echo generate_form_token($pun_add_user_form_action) ?>" />
+							<input type="hidden" name="add_user_form_sent" value="1" />
+						</div>
+
+						<div class="frm-group group1">
+							<div class="sf-set set1">
+								<div class="sf-box text required">
+									<label for="add_user_username">
+										<span><?php echo $lang_admin_add_user[\'Username\'] ?></span>
+										<small>
+											<?php echo $lang_admin_add_user[\'Between 2 and 25 characters\'] ?>
+										</small>
+									</label>
+									<span class="fld-input"><input type="text" id="add_user_username" name="req_username" size="35" value="<?php echo $username ?>" maxlength="25" required /></span>
+								</div>
+							</div>
+
+							<div class="sf-set set2">
+								<div class="sf-box text required">
+									<label for="add_user_email">
+										<span><?php echo $lang_admin_add_user[\'E-mail\'] ?></span>
+										<small>
+											<?php echo $lang_admin_add_user[\'Enter a current and valid e-mail address\'] ?>
+										</small>
+									</label>
+									<span class="fld-input"><input type="text" id="add_user_email" name="req_email" size="35" value="<?php echo $email ?>" maxlength="80" required/></span>
+								</div>
+							</div>
+
+							<div class="sf-set set3">
+								<div class="sf-box checkbox">
+									<span class="fld-input"><input type="checkbox" id="add_user_edit_user_identity" name="edit_identity" value="1"<?php echo $edit_identity ? \' checked="checked"\' : \'\' ?> /></span>
+									<label for="add_user_edit_user_identity"><?php echo $lang_admin_add_user[\'Edit User Identity after adding User\'] ?></label>
+								</div>
+							</div>
+						</div>
+
+						<div class="frm-buttons">
+							<span class="submit primary"><input type="submit" name="submit" value="<?php echo $lang_admin_add_user[\'Add user\'] ?>" /></span>
+						</div>
+					</form>
+				</div>
+				<?php
+
+				echo substr($buffer_old, $pos, strlen($buffer_old) - $pos);
+			}
+
+array_pop($GLOBALS[\'ext_info_stack\']);
+$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
+',
+  ),
+  'ed_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2301,10 +3146,10 @@ if ($forum_user[\'language\'] !== \'English\' && file_exists($ext_info[\'path\']
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'po_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'po_start' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2334,10 +3179,10 @@ if ($forum_user[\'language\'] !== \'English\' && file_exists($ext_info[\'path\']
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_post_selected' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ed_post_selected' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2383,10 +3228,10 @@ $topic_poll = FALSE;
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_pre_header_load' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ed_pre_header_load' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2401,10 +3246,10 @@ $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_form_submitted' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ed_form_submitted' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2430,10 +3275,10 @@ if (!isset($_POST[\'preview\']) && $can_edit_subject && ($forum_user[\'group_id\
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_end_validation' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ed_end_validation' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2489,10 +3334,10 @@ if (!isset($_POST[\'reset_poll\']) || $_POST[\'reset_poll\'] != \'1\') {
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_preview_pre_display' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ed_preview_pre_display' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2510,10 +3355,10 @@ if ((($forum_user[\'group_id\'] == FORUM_ADMIN && $can_edit_subject) || ($can_ed
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_main_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ed_main_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2537,10 +3382,10 @@ if ($can_edit_subject && ($forum_user[\'group_id\'] == FORUM_ADMIN || $forum_use
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'po_form_submitted' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'po_form_submitted' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2567,61 +3412,10 @@ if ($fid && ($forum_user[\'group_id\'] == FORUM_ADMIN || $forum_user[\'g_poll_ad
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'po_end_validation' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_poll\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($fid && isset($_POST[\'update_poll\']) && empty($errors))	{
-				$new_poll_ans_count = isset($_POST[\'poll_ans_count\']) && intval($_POST[\'poll_ans_count\']) > 0 ? intval($_POST[\'poll_ans_count\']) : FALSE;
-
-				if (!$new_poll_ans_count)
-					$errors[] = $lang_pun_poll[\'Empty option count\'];
-
-				if ($new_poll_ans_count < 2)
-				{
-					$errors[] = $lang_pun_poll[\'Min cnt options\'];
-					$new_poll_ans_count = 2;
-				}
-
-				if ($new_poll_ans_count > $forum_config[\'p_pun_poll_max_answers\'])
-				{
-					$errors[] = sprintf($lang_pun_poll[\'Max cnt options\'], $forum_config[\'p_pun_poll_max_answers\']);
-					$new_poll_ans_count = $forum_config[\'p_pun_poll_max_answers\'];
-				}
-
-				$_POST[\'preview\'] = \'pun_poll\';
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!empty($_POST[\'pun_tags\']) && $forum_user[\'g_pun_tags_allow\'])
-				$new_tags = pun_tags_parse_string(utf8_trim($_POST[\'pun_tags\']));
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'po_pre_header_load' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'po_pre_header_load' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2640,10 +3434,10 @@ if ($fid && isset($_POST[\'update_poll\']) && isset($_POST[\'preview\']) && $_PO
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'po_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'po_pre_redirect' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2660,10 +3454,10 @@ if ($fid && ($forum_user[\'group_id\'] == FORUM_ADMIN || $forum_user[\'g_poll_ad
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'po_preview_pre_display' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'po_preview_pre_display' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2679,10 +3473,10 @@ if ($fid && ($forum_user[\'group_id\'] == FORUM_ADMIN || $forum_user[\'g_poll_ad
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'po_req_info_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'po_req_info_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2703,10 +3497,10 @@ if ($fid && ($forum_user[\'group_id\'] == FORUM_ADMIN || $forum_user[\'g_poll_ad
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ca_fn_prune_qr_prune_topics' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'ca_fn_prune_qr_prune_topics' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2738,63 +3532,10 @@ $pun_poll_topic_ids = isset($topic_ids) ? $topic_ids : implode(\',\', $topics);
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'mr_confirm_delete_topics_qr_delete_topics' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_poll\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$pun_poll_topic_ids = isset($topic_ids) ? $topic_ids : implode(\',\', $topics);
-			$query_poll = array(
-				\'DELETE\'	=>	\'voting\',
-				\'WHERE\'		=>	\'topic_id IN(\'.$pun_poll_topic_ids.\')\'
-			);
-			$forum_db->query_build($query_poll) or error(__FILE__, __LINE__);
-
-			$query_poll = array(
-				\'DELETE\'	=>	\'questions\',
-				\'WHERE\'		=>	\'topic_id IN(\'.$pun_poll_topic_ids.\')\'
-			);
-			$forum_db->query_build($query_poll) or error(__FILE__, __LINE__);
-
-			$query_poll = array(
-				\'DELETE\'	=>	\'answers\',
-				\'WHERE\'		=>	\'topic_id IN(\'.$pun_poll_topic_ids.\')\'
-			);
-			$forum_db->query_build($query_poll) or error(__FILE__, __LINE__);
-			unset($pun_poll_topic_ids);
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$query_tags = array(
-				\'DELETE\'	=>	\'topic_tags\',
-				\'WHERE\'		=>	\'topic_id IN(\'.implode(\',\', $topics).\')\'
-			);
-			$forum_db->query_build($query_tags) or error(__FILE__, __LINE__);
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'fn_delete_topic_qr_delete_topic' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'fn_delete_topic_qr_delete_topic' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2810,10 +3551,10 @@ include_once $ext_info[\'path\'].\'/functions.php\';
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'mr_qr_get_forum_data' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'mr_qr_get_forum_data' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -2862,55 +3603,10 @@ if (isset($_POST[\'merge_topics\']) || isset($_POST[\'merge_topics_comply\']))
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'mr_confirm_merge_topics_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_poll\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (isset($question_id) && $question_id != $merge_to_tid)
-			{
-				$query_poll = array(
-					\'UPDATE\'	=>	\'questions\',
-					\'SET\'		=>	\'topic_id = \'.$merge_to_tid,
-					\'WHERE\'		=>	\'topic_id = \'.$question_id
-				);
-				$forum_db->query_build($query) or error(__FILE__, __LINE__);
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$query = array(
-				\'UPDATE\'	=>	\'topic_tags\',
-				\'SET\'		=>	\'topic_id = \'.$merge_to_tid,
-				\'WHERE\'		=>	\'topic_id IN(\'.implode(\',\', $topics).\') AND topic_id != \'.$merge_to_tid
-			);
-			$forum_db->query_build($query) or error(__FILE__, __LINE__);
-			pun_tags_generate_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'vt_modify_topic_info' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'vt_modify_topic_info' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -3049,10 +3745,10 @@ if (!$forum_user[\'is_guest\']) {
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'vt_pre_header_load' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'vt_pre_header_load' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -3227,10 +3923,10 @@ $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'aop_features_pre_header_load' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'aop_features_pre_header_load' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -3247,125 +3943,10 @@ if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'aop_features_avatars_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_poll\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-?>
-				<div class="content-head">
-					<h2 class="hn"><span><?php echo $lang_pun_poll[\'Name plugin\'] ?></span></h2>
-				</div>
-				<fieldset class="frm-group group1">
-					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-						<div class="sf-box checkbox">
-							<span class="fld-input">
-								<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="checkbox" name="form[pun_poll_enable_revote]" value="1"<?php if ($forum_config[\'p_pun_poll_enable_revote\'] == \'1\') echo \' checked="checked"\' ?>/>
-							</span>
-							<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>">
-								<span><?php echo $lang_pun_poll[\'Disable revoting info\'] ?></span>
-								<?php echo $lang_pun_poll[\'Disable revoting\'] ?>
-							</label>
-						</div>
-					</div>
-					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-						<div class="sf-box checkbox">
-							<span class="fld-input">
-								<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="checkbox" name="form[pun_poll_enable_read]" value="1"<?php if ($forum_config[\'p_pun_poll_enable_read\'] == \'1\') echo \' checked="checked"\' ?>/>
-							</span>
-							<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>">
-								<span><?php echo $lang_pun_poll[\'Disable see results\'] ?></span>
-								<?php echo $lang_pun_poll[\'Disable see results info\'] ?>
-							</label>
-						</div>
-					</div>
-					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-						<div class="sf-box text">
-							<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>">
-								<span><?php echo $lang_pun_poll[\'Maximum answers info\'] ?></span>
-								<small><?php echo $lang_pun_poll[\'Maximum answers\'] ?></small>
-							</label>
-							</br>
-							<span class="fld-input">
-								<input id="fld<?php echo $forum_page[\'fld_count\'] ?>" type="text" name="form[pun_poll_max_answers]" size="6" maxlength="6" value="<?php echo $forum_config[\'p_pun_poll_max_answers\'] ?>"/>
-							</span>
-						</div>
-					</div>
-				</fieldset>
-			<?php
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-        1 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-?>
-			<div class="content-head">
-				<h2 class="hn">
-					<span><?php echo $lang_pun_tags[\'Pun Tags\']; ?></span>
-				</h2>
-			</div>
-			<fieldset class="frm-group group1">
-				<legend class="group-legend">
-					<span><?php echo $lang_pun_tags[\'Settings\']; ?></span>
-				</legend>
-				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-					<div class="sf-box checkbox">
-						<span class="fld-input">
-							<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="checkbox" <?php if ($forum_config[\'o_pun_tags_show\'] == \'1\') echo \' checked="checked"\' ?> value="1" name="form[pun_tags_show]"/>
-						</span>
-						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>">
-							<span><?php echo $lang_pun_tags[\'Show Pun Tags\']; ?></span>
-							<?php echo $lang_pun_tags[\'Pun Tags notice\']; ?>
-						</label>
-					</div>
-				</div>
-				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-					<div class="sf-box text">
-						<span class="fld-input">
-							<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="text" value="<?php echo $forum_config[\'o_pun_tags_count_in_cloud\']; ?>" maxlength="6" size="6" name="form[pun_tags_count_in_cloud]"/>
-						</span>
-						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>">
-							<span><?php echo $lang_pun_tags[\'Tags count\']; ?></span>
-							<small><?php echo $lang_pun_tags[\'Tags count info\']; ?></small>
-						</label>
-					</div>
-				</div>
-				<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-					<div class="sf-box text">
-						<span class="fld-input">
-							<input id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" type="text" value="<?php echo $forum_config[\'o_pun_tags_separator\']; ?>" maxlength="10" size="6" name="form[pun_tags_separator]"/>
-						</span>
-						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>">
-							<span><?php echo $lang_pun_tags[\'Separator\']; ?></span>
-							<small><?php echo $lang_pun_tags[\'Separator info\']; ?></small>
-						</label>
-					</div>
-				</div>
-			</fieldset>
-			<?php
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'agr_add_edit_group_user_permissions_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+  ),
+  'agr_add_edit_group_user_permissions_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
 \'id\'				=> \'pun_poll\',
 \'path\'			=> FORUM_ROOT.\'extensions/pun_poll\',
 \'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_poll\',
@@ -3397,736 +3978,155 @@ if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'agr_add_edit_group_flood_fieldset_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+  ),
+  'po_pre_post_contents' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_bbcode\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
-?>
-				<div class="content-head">
-					<h3 class="hn"><span><?php echo $lang_pun_tags[\'Permissions\']; ?></span></h3>
-				</div>
-				<fieldset class="mf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
-					<legend><span><?php echo $lang_pun_tags[\'Create tags perms\']; ?></span></legend>
-					<div class="mf-box">
-						<div class="mf-item">
-							<span class="fld-input"><input type="checkbox" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="pun_tags_allow" value="1"<?php if ($group[\'g_pun_tags_allow\'] == \'1\') echo \' checked="checked"\' ?> /></span>
-						<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_tags[\'Name check\']; ?></label>
-						</div>
-					</div>
-				</fieldset>
-			<?php
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'hd_main_elements' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-//Output of search results
-			if ($forum_config[\'o_pun_tags_show\'] == \'1\' && in_array(FORUM_PAGE, array(\'index\', \'viewforum\', \'viewtopic\', \'searchtopics\', \'searchposts\')))
+if ($forum_user[\'pun_bbcode_enabled\'])
 			{
-				$output_results = array();
-				switch (FORUM_PAGE)
-				{
-					case \'index\':
-						if (isset($pun_tags[\'forums\']))
-						{
-							foreach ($pun_tags[\'forums\'] as $forum_id => $tags_list)
-							{
-								//Can user read this forum?
-								if (in_array($forum_id, $pun_tags_groups_perms[$forum_user[\'group_id\']]))
-								{
-									foreach ($tags_list as $tag_id => $tag_weight)
-										if (!isset($output_results[$tag_id]))
-											$output_results[$tag_id] = array(\'tag\' => $pun_tags[\'index\'][$tag_id], \'weight\' => $tag_weight);
-										else
-											$output_results[$tag_id][\'weight\'] += $tag_weight;
-								}
-							}
-						}
-						break;
-
-					case \'viewforum\':
-						if (isset($pun_tags[\'forums\'][$id]))
-						{
-							foreach ($pun_tags[\'forums\'][$id] as $tag_id => $tag_weight)
-							{
-								$output_results[$tag_id] = array(\'tag\' => $pun_tags[\'index\'][$tag_id], \'weight\' => $tag_weight);
-								//Determine tag weight
-								foreach ($pun_tags[\'forums\'] as $forum_id => $tags_list)
-									if ($forum_id != $id && in_array($forum_id, $pun_tags_groups_perms[$forum_user[\'group_id\']]) && in_array($tag_id, array_keys($tags_list)))
-										$output_results[$tag_id][\'weight\'] += $tags_list[$tag_id];
-							}
-						}
-						break;
-
-					case \'viewtopic\':
-						if (isset($pun_tags[\'topics\'][$id]))
-						{
-							foreach ($pun_tags[\'topics\'][$id] as $tag_id)
-							{
-								$output_results[$tag_id] = array(\'tag\' => $pun_tags[\'index\'][$tag_id], \'weight\' => $pun_tags[\'forums\'][$cur_topic[\'forum_id\']][$tag_id]);
-								//Determine tag weight
-								foreach ($pun_tags[\'forums\'] as $forum_id => $tags_list)
-									if ($forum_id != $cur_topic[\'forum_id\'] && in_array($forum_id, $pun_tags_groups_perms[$forum_user[\'group_id\']]) && in_array($tag_id, array_keys($tags_list)))
-										$output_results[$tag_id][\'weight\'] += $tags_list[$tag_id];
-							}
-						}
-						break;
-
-					case \'searchtopics\':
-					case \'searchposts\':
-						//This string will be replaced after getting search results
-						$main_elements[\'<!-- forum_crumbs_end -->\'] .= \'<div id="brd-pun_tags"></div>\';
-						break;
-				}
-
-				if (!empty($output_results))
-				{
-					$minfontsize = 100;
-					$maxfontsize = 200;
-					list($min_pop, $max_pop) = min_max_tags_weights($output_results);
-					if ($max_pop - $min_pop == 0)
-						$step = $maxfontsize - $minfontsize;
-					else
-						$step = ($maxfontsize - $minfontsize) / ($max_pop - $min_pop);
-
-					uasort($output_results, \'compare_tags\');
-					$output_results = array_tags_slice($output_results);
-					$results = array();
-					foreach ($output_results as $tag_id => $tag_info)
-					{
-						$results[] = pun_tags_get_link(round(($tag_info[\'weight\'] - $min_pop) * $step + $minfontsize), $tag_id, $tag_info[\'weight\'], $tag_info[\'tag\']);
-					}
-					$main_elements[\'<!-- forum_crumbs_end -->\'] .= \'<div id="brd-pun_tags"><ul>\'.implode($forum_config[\'o_pun_tags_separator\'], $results).\'</ul></div>\';
-					unset($minfontsize, $maxfontsize, $step, $results, $min_pop, $max_pop);
-				}
-				unset($output_results, $tags_weights);
+				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
+				include $ext_info[\'path\'].\'/bar.php\';
+				$pun_bbcode_bar = new Pun_bbcode;
+				$pun_bbcode_bar->render();
 			}
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'co_modify_url_scheme' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+  ),
+  'vt_quickpost_pre_message_box' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_bbcode\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
-if (file_exists($ext_info[\'path\'].\'/url/\'.$forum_config[\'o_sef\'].\'.php\'))
-				require $ext_info[\'path\'].\'/url/\'.$forum_config[\'o_sef\'].\'.php\';
-			else
-				require $ext_info[\'path\'].\'/url/Default.php\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    're_rewrite_rules' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$forum_rewrite_rules[\'/^tag[\\/_-]?([0-9]+)(\\.html?|\\/)?$/i\'] = \'search.php?action=tag&tag_id=$1\';
-			$forum_rewrite_rules[\'/^tag[\\/_-]?([0-9]+)[\\/_-]p(age)?[\\/_-]?([0-9]+)(\\.html?|\\/)?$/i\'] = \'search.php?action=tag&tag_id=$1&p=$3\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'se_results_pre_header_load' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($action == \'tag\')
+if ($forum_user[\'pun_bbcode_enabled\'])
 			{
-				// Regenerate paging links
-				$tag_id = isset($_GET[\'tag_id\']) ? intval($_GET[\'tag_id\']) : 0;
-				if ($tag_id >= 1)
-					$forum_page[\'page_post\'][\'paging\'] = \'<p class="paging"><span class="pages">\'.$lang_common[\'Pages\'].\'</span> \'.paginate($forum_page[\'num_pages\'], $forum_page[\'page\'], $forum_url[\'search_tag\'], $lang_common[\'Paging separator\'], $tag_id).\'</p>\';
+				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
+				include $ext_info[\'path\'].\'/bar.php\';
+				$pun_bbcode_bar = new Pun_bbcode;
+				$pun_bbcode_bar->render();
 			}
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'mr_confirm_split_posts_form_submitted' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+  ),
+  'ed_pre_message_box' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_bbcode\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
-if (!empty($_POST[\'pun_tags\']) && $forum_user[\'g_pun_tags_allow\'])
-				$new_tags = pun_tags_parse_string(utf8_trim($_POST[\'pun_tags\']));
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'fn_add_topic_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-global $new_tags, $pun_tags, $forum_user;
-
-			// Add tags to DB
-			if (!empty($new_tags) && $forum_user[\'g_pun_tags_allow\'])
+if ($forum_user[\'pun_bbcode_enabled\'])
 			{
-				$search_arr = isset($pun_tags[\'index\']) ? $pun_tags[\'index\'] : array();
-				foreach ($new_tags as $pun_tag)
-				{
-					$tag_id = array_search($pun_tag, $search_arr);
-					if ($tag_id !== FALSE)
-						pun_tags_add_existing_tag($tag_id, $new_tid);
-					else
-						pun_tags_add_new($pun_tag, $new_tid);
-				}
-				pun_tags_generate_cache();
+				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
+				include $ext_info[\'path\'].\'/bar.php\';
+				$pun_bbcode_bar = new Pun_bbcode;
+				$pun_bbcode_bar->render();
 			}
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'mr_confirm_split_posts_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+  ),
+  'pun_pm_fn_send_form_pre_textarea_output' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_bbcode\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
-if (!empty($new_tags) && $forum_user[\'g_pun_tags_allow\'])
+if ($forum_user[\'pun_bbcode_enabled\'])
 			{
-				foreach ($new_tags as $pun_tag)
-					pun_tags_add_new($pun_tag, $new_tid);
-				pun_tags_generate_cache();
+				define(\'PUN_BBCODE_BAR_INCLUDE\', 1);
+				include $ext_info[\'path\'].\'/bar.php\';
+				$pun_bbcode_bar = new Pun_bbcode;
+				$pun_bbcode_bar->render();
 			}
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'fn_delete_topic_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+  ),
+  'pf_change_details_settings_validation' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_bbcode\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
-// Remove topic tags
-			pun_tags_remove_topic_tags($topic_id);
-			pun_tags_remove_orphans();
-			pun_tags_generate_cache();
+$form[\'pun_bbcode_enabled\'] = (!isset($_POST[\'form\'][\'pun_bbcode_enabled\']) || $_POST[\'form\'][\'pun_bbcode_enabled\'] != \'1\') ? \'0\' : \'1\';
+			$form[\'pun_bbcode_use_buttons\'] = (!isset($_POST[\'form\'][\'pun_bbcode_use_buttons\']) || $_POST[\'form\'][\'pun_bbcode_use_buttons\'] != \'1\') ? \'0\' : \'1\';
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
-    'ed_pre_post_edited' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($can_edit_subject && $forum_user[\'g_pun_tags_allow\'])
-			{
-				//Parse the string
-				if (isset($_POST[\'pun_tags\']))
-					$new_tags = pun_tags_parse_string(utf8_trim($_POST[\'pun_tags\']));
-				if (empty($new_tags))
-				{
-					if (isset($pun_tags[\'topics\'][$cur_post[\'tid\']]))
-					{
-						pun_tags_remove_topic_tags($cur_post[\'tid\']);
-						$update_cache = TRUE;
-					}
-				}
-				else
-				{
-					//Determine old tags
-					$old_tags = array();
-					if (!empty($pun_tags[\'topics\'][$cur_post[\'tid\']]))
-					{
-						foreach ($pun_tags[\'topics\'][$cur_post[\'tid\']] as $old_tagid)
-							$old_tags[$old_tagid] = $pun_tags[\'index\'][$old_tagid];
-					}
-
-					//Tags for removing
-					$remove_tags = array_diff($old_tags, $new_tags);
-					if (!empty($remove_tags))
-					{
-						$pun_tags_query = array(
-							\'DELETE\'	=>	\'topic_tags\',
-							\'WHERE\'		=>	\'topic_id = \'.$cur_post[\'tid\'].\' AND tag_id IN (\'.implode(\',\', array_keys($remove_tags)).\')\'
-						);
-						$forum_db->query_build($pun_tags_query) or error(__FILE__, __LINE__);
-						$update_cache = TRUE;
-					}
-
-					$search_arr = isset($pun_tags[\'index\']) ? $pun_tags[\'index\'] : array();
-					foreach ($new_tags as $tag)
-					{
-						//Have we current tag?
-						if (in_array($tag, $old_tags))
-							continue;
-						$tag_id = array_search($tag, $search_arr);
-						if ($tag_id === FALSE)
-							pun_tags_add_new($tag, $cur_post[\'tid\']);
-						else
-							pun_tags_add_existing_tag($tag_id, $cur_post[\'tid\']);
-						$update_cache = TRUE;
-					}
-				}
-
-				if (!empty($update_cache))
-				{
-					pun_tags_remove_orphans();
-					pun_tags_generate_cache();
-				}
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'ca_fn_prune_qr_prune_subscriptions' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$query_tags = array(
-				\'DELETE\'	=>	\'topic_tags\',
-				\'WHERE\'		=>	\'topic_id IN(\'.$topic_ids.\')\'
-			);
-			$forum_db->query_build($query_tags) or error(__FILE__, __LINE__);
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'acg_del_cat_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-pun_tags_remove_orphans();
-			pun_tags_generate_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'mr_confirm_delete_topics_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-pun_tags_remove_orphans();
-			pun_tags_generate_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'afo_del_forum_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-pun_tags_remove_orphans();
-			pun_tags_generate_cache();
-			require_once $ext_info[\'path\'].\'/functions.php\';
-			pun_tags_generate_forum_perms_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'mr_confirm_move_topics_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-pun_tags_generate_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'mr_confirm_split_posts_pre_confirm_checkbox' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($fid)
-			{
-				$res_tags = array();
-				if (isset($pun_tags[\'topics\'][$tid]))
-				{
-
-					foreach ($pun_tags[\'topics\'][$tid] as $tag_id)
-						foreach ($pun_tags[\'index\'] as $tag)
-							if ($tag[\'tag_id\'] == $tag_id)
-								$res_tags[] = $tag[\'tag\'];
-				}
-
-				?>
-				<div class="sf-box text">
-						<label for="fld<?php echo ++$forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_tags[\'Topic tags\']; ?></span><small><?php echo $lang_pun_tags[\'Enter tags\']; ?></small></label><br />
-						<span class="fld-input"><input id="fld<?php echo $forum_page[\'fld_count\'] ?>" type="text" name="pun_tags" value="<?php if (!empty($res_tags)) echo implode(\', \', $res_tags); else echo \'\';  ?>" size="70" maxlength="100"/></span>
-				</div>
-			<?php
-
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'se_post_results_fetched' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if (!empty($search_set))
-			{
-				//Array with tags id
-				$tags = array();
-				//Array with processed topics
-				$processed_topics = array();
-				foreach ($search_set as $res)
-				{
-					if (!isset($pun_tags[\'topics\'][$res[\'tid\']]) || in_array($res[\'tid\'], $processed_topics))
-						continue;
-
-					$processed_topics[] = $res[\'tid\'];
-					$tags = array_merge($tags, array_diff($pun_tags[\'topics\'][$res[\'tid\']], $tags));
-				}
-				//Array with tags and weights
-				$tags_results = array();
-				if (!empty($tags))
-				{
-					//Calculation of tags weight
-					foreach ($pun_tags_groups_perms[$forum_user[\'group_id\']] as $forum_id)
-					{
-						if (!isset($pun_tags[\'forums\'][$forum_id]))
-							continue;
-						//Calcullate common keys in arrays
-						$tmp = array_intersect($tags, array_keys($pun_tags[\'forums\'][$forum_id]));
-						foreach ($tmp as $cur_tag)
-						{
-							if (!isset($tags_results[$cur_tag]))
-								$tags_results[$cur_tag] = array(\'tag\' => $pun_tags[\'index\'][$cur_tag], \'weight\' => $pun_tags[\'forums\'][$forum_id][$cur_tag]);
-							else
-								$tags_results[$cur_tag][\'weight\'] += $pun_tags[\'forums\'][$forum_id][$cur_tag];
-						}
-					}
-					unset($tmp);
-				}
-				unset($tags);
-				if (!empty($tags_results))
-				{
-					$minfontsize = 100;
-					$maxfontsize = 200;
-					list($min_pop, $max_pop) = min_max_tags_weights($tags_results);
-					if ($max_pop - $min_pop == 0)
-						$step = $maxfontsize - $minfontsize;
-					else
-						$step = ($maxfontsize - $minfontsize) / ($max_pop - $min_pop);
-
-					uasort($tags_results, \'compare_tags\');
-					$tags_results = array_tags_slice($tags_results);
-					$ouput_results = array();
-					foreach ($tags_results as $tag_id => $tag_info)
-						$ouput_results[] = pun_tags_get_link(round(($tag_info[\'weight\'] - $min_pop) * $step + $minfontsize), $tag_id, $tag_info[\'weight\'], $tag_info[\'tag\']);
-					unset($minfontsize, $maxfontsize, $step, $tags_results, $min_pop, $max_pop);
-				}
-				unset($tags_results);
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'sf_fn_generate_action_search_query_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($action == \'tag\')
-			{
-				$tag_id = isset($_GET[\'tag_id\']) ? intval($_GET[\'tag_id\']) : 0;
-				if ($tag_id < 1)
-					message($lang_common[\'Bad request\']);
-				global $pun_tags;
-				if (isset($pun_tags[\'topics\']))
-				{
-					foreach ($pun_tags[\'topics\'] as $topic_id => $tags)
-						if (in_array($tag_id, $tags))
-							$search_ids[] = $topic_id;
-					if (empty($search_ids))
-						message($lang_common[\'Bad request\']);
-				}
-				$query = array(
-					\'SELECT\'	=> \'t.id AS tid, t.poster, t.subject, t.first_post_id, t.posted, t.last_post, t.last_post_id, t.last_poster, t.num_replies, t.closed, t.sticky, t.forum_id, f.forum_name\',
-					\'FROM\'		=> \'topics AS t\',
-					\'JOINS\'		=> array(
-						array(
-							\'INNER JOIN\'	=> \'forums AS f\',
-							\'ON\'			=> \'f.id=t.forum_id\'
-						),
-						array(
-							\'LEFT JOIN\'		=> \'forum_perms AS fp\',
-							\'ON\'			=> \'(fp.forum_id=f.id AND fp.group_id=\'.$forum_user[\'g_id\'].\')\'
-						)
-					),
-					\'WHERE\'		=> \'(fp.read_forum IS NULL OR fp.read_forum=1) AND t.id IN(\'.implode(\',\', $search_ids).\')\',
-					\'ORDER BY\'	=> \'t.last_post DESC\'
-				);
-				// With "has posted" indication
-				if (!$forum_user[\'is_guest\'] && $forum_config[\'o_show_dot\'] == \'1\')
-				{
-					$subquery = array(
-						\'SELECT\'	=> \'COUNT(p.id)\',
-						\'FROM\'		=> \'posts AS p\',
-						\'WHERE\'		=> \'p.poster_id=\'.$forum_user[\'id\'].\' AND p.topic_id=t.id\'
-					);
-
-					$query[\'SELECT\'] .= \', (\'.$forum_db->query_build($subquery, true).\') AS has_posted\';
-				}
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'ft_end' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-if ($forum_config[\'o_pun_tags_show\'] == 1)
-			{
-				if (!empty($ouput_results))
-					$tpl_main = str_replace(\'<div id="brd-pun_tags"></div>\', \'<div id="brd-pun_tags"><ul>\'.implode($forum_config[\'o_pun_tags_separator\'], $ouput_results).\'</ul></div>\', $tpl_main);
-				else
-					$tpl_main = str_replace(\'<div id="brd-pun_tags"></div>\', \'\', $tpl_main);
-			}
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'sf_fn_validate_actions_start' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-$valid_actions[] = \'tag\';
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'afo_save_forum_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-require_once $ext_info[\'path\'].\'/functions.php\';
-			pun_tags_generate_forum_perms_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'afo_revert_perms_form_submitted' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-require_once $ext_info[\'path\'].\'/functions.php\';
-			pun_tags_generate_forum_perms_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'agr_del_group_pre_redirect' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
-\'dependencies\'	=> array (
-)
-);
-$ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-
-require_once $ext_info[\'path\'].\'/functions.php\';
-			pun_tags_generate_forum_perms_cache();
-
-array_pop($GLOBALS[\'ext_info_stack\']);
-$ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
-',
-    ),
-    'ca_fn_generate_admin_menu_new_sublink' =>
-    array(
-        0 => '$GLOBALS[\'ext_info_stack\'][] = array(
-\'id\'				=> \'pun_tags\',
-\'path\'			=> FORUM_ROOT.\'extensions/pun_tags\',
-\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_tags\',
+  ),
+  'pf_change_details_settings_email_fieldset_end' => 
+  array (
+    0 => '$GLOBALS[\'ext_info_stack\'][] = array(
+\'id\'				=> \'pun_bbcode\',
+\'path\'			=> FORUM_ROOT.\'extensions/pun_bbcode\',
+\'url\'			=> $GLOBALS[\'base_url\'].\'/extensions/pun_bbcode\',
 \'dependencies\'	=> array (
 )
 );
 $ext_info = $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 
 if (file_exists($ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\'))
-				require $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
+				include $ext_info[\'path\'].\'/lang/\'.$forum_user[\'language\'].\'/\'.$ext_info[\'id\'].\'.php\';
 			else
-				require $ext_info[\'path\'].\'/lang/English/\'.$ext_info[\'id\'].\'.php\';
-			require $ext_info[\'path\'].\'/pun_tags_url.php\';
+				include $ext_info[\'path\'].\'/lang/English/pun_bbcode.php\';
 
-			if ((FORUM_PAGE_SECTION == \'management\') && ($forum_user[\'g_id\'] == FORUM_ADMIN))
-				$forum_page[\'admin_submenu\'][\'pun_tags_management\'] = \'<li class="\'.((FORUM_PAGE == \'admin-management-manage_tags\') ? \'active\' : \'normal\').((empty($forum_page[\'admin_menu\'])) ? \' first-item\' : \'\').\'"><a href="\'.forum_link($pun_tags_url[\'Section pun_tags\']).\'">\'.$lang_pun_tags[\'Section tags\'].\'</a></li>\';
+			$forum_page[\'item_count\'] = 0;
+?>
+				<fieldset class="frm-group group<?php echo ++$forum_page[\'group_count\'] ?>">
+					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+						<div class="sf-box checkbox">
+							<span class="fld-input"><input type="checkbox" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_bbcode_enabled]" value="1"<?php if ($user[\'pun_bbcode_enabled\'] == \'1\') echo \' checked="checked"\' ?> /></span>
+							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><span><?php echo $lang_pun_bbcode[\'Pun BBCode Bar\'] ?></span> <?php echo $lang_pun_bbcode[\'Notice BBCode Bar\'] ?></label>
+						</div>
+					</div>
+					<div class="sf-set set<?php echo ++$forum_page[\'item_count\'] ?>">
+						<div class="sf-box checkbox">
+							<span class="fld-input"><input type="checkbox" id="fld<?php echo ++$forum_page[\'fld_count\'] ?>" name="form[pun_bbcode_use_buttons]" value="1"<?php if ($user[\'pun_bbcode_use_buttons\'] == \'1\') echo \' checked="checked"\' ?> /></span>
+							<label for="fld<?php echo $forum_page[\'fld_count\'] ?>"><?php echo $lang_pun_bbcode[\'BBCode Graphical buttons\'] ?></label>
+						</div>
+					</div>
+				</fieldset>
+<?php
 
 array_pop($GLOBALS[\'ext_info_stack\']);
 $ext_info = empty($GLOBALS[\'ext_info_stack\']) ? array() : $GLOBALS[\'ext_info_stack\'][count($GLOBALS[\'ext_info_stack\']) - 1];
 ',
-    ),
+  ),
 );
 
 ?>
