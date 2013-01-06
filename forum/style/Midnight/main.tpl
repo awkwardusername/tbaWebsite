@@ -17,11 +17,11 @@
         <!-- forum_welcome -->
         <!-- forum_visit -->
     </div>
-    <div id="brd-head" class="gen-content">
+    <!--<div id="brd-head" class="gen-content"> -->
         <!-- forum_skip -->
         <!-- forum_title -->
         <!-- forum_desc -->
-    </div>
+    <!-- </div> -->
     <div id="brd-navlinks" class="gen-content">
         <!-- forum_admod -->
         <!-- forum_navlinks -->

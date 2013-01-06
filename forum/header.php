@@ -158,10 +158,10 @@ $gen_elements['<!-- forum_page -->'] = 'id="brd-'.FORUM_PAGE.'" class="brd-page 
 $gen_elements['<!-- forum_skip -->'] = '<p id="brd-access"><a href="#brd-main">'.$lang_common['Skip to content'].'</a></p>';
 
 // Forum Title
-$gen_elements['<!-- forum_title -->'] = '<p id="brd-title"><a href="'.forum_link($forum_url['index']).'">'.forum_htmlencode($forum_config['o_board_title']).'</a></p>';
+/*$gen_elements['<!-- forum_title -->'] = '<p id="brd-title"><a href="'.forum_link($forum_url['index']).'">'.forum_htmlencode($forum_config['o_board_title']).'</a></p>';*/
 
-// Forum Description
-$gen_elements['<!-- forum_desc -->'] = ($forum_config['o_board_desc'] != '') ? '<p id="brd-desc">'.forum_htmlencode($forum_config['o_board_desc']).'</p>' : '';
+/*// Forum Description
+$gen_elements['<!-- forum_desc -->'] = ($forum_config['o_board_desc'] != '') ? '<p id="brd-desc">'.forum_htmlencode($forum_config['o_board_desc']).'</p>' : '';*/
 
 // Main Navigation
 $gen_elements['<!-- forum_navlinks -->'] = '<ul>'."\n\t\t".generate_navlinks()."\n\t".'</ul>';
