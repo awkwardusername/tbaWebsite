@@ -1,7 +1,7 @@
 <?php
 
-    define('FORUM_BANS_LOADED', 1);
+define('FORUM_BANS_LOADED', 1);
 
-    $forum_bans = array();
+$forum_bans = array();
 
 ?>

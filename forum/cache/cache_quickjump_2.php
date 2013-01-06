@@ -1,9 +1,9 @@
 <?php
 
-    if (!defined('FORUM'))
-        exit;
-    define('FORUM_QJ_LOADED', 1);
-    $forum_id = isset($forum_id) ? $forum_id : 0;
+if (!defined('FORUM'))
+    exit;
+define('FORUM_QJ_LOADED', 1);
+$forum_id = isset($forum_id) ? $forum_id : 0;
 
 ?>
 <form id="qjump" method="get" accept-charset="utf-8"
@@ -23,7 +23,7 @@
 </form>
 <?php
 
-    $forum_javascript_quickjump_code = <<<EOL
+$forum_javascript_quickjump_code = <<<EOL
 (function () {
 	var forum_quickjump_url = "http://localhost:1359/TheBloodAmbulance/forum/viewforum.php?id=$1";
 	var sef_friendly_url_array = new Array(4);
@@ -36,5 +36,5 @@
 }());
 EOL;
 
-    $forum_loader->add_js($forum_javascript_quickjump_code, array('type' => 'inline', 'weight' => 60, 'group' => FORUM_JS_GROUP_SYSTEM));
+$forum_loader->add_js($forum_javascript_quickjump_code, array('type' => 'inline', 'weight' => 60, 'group' => FORUM_JS_GROUP_SYSTEM));
 ?>

@@ -44,7 +44,8 @@
 <div id="content">
     <section id="pool">
         <?php
-        for ($i = 1; $i < 64; $i++) {
+        for ($i = 1; $i < 64; $i++)
+        {
             echo '<a href=\'pool/uploads/q (';
             echo $i;
             echo ').jpg\' ';

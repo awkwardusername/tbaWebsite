@@ -1,53 +1,54 @@
 <?php
 
-    /**
-     * pun_admin_manage_extensions_improved: continue page
-     *
-     * @copyright Copyright (C) 2009-2012 PunBB
-     * @license   http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
-     * @package   pun_admin_manage_extensions_improved
-     */
+/**
+ * pun_admin_manage_extensions_improved: continue page
+ *
+ * @copyright Copyright (C) 2009-2012 PunBB
+ * @license   http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * @package   pun_admin_manage_extensions_improved
+ */
 
-    define('FORUM_PAGE_SECTION', 'extensions');
-    define('FORUM_PAGE', 'admin-extensions-manage');
+define('FORUM_PAGE_SECTION', 'extensions');
+define('FORUM_PAGE', 'admin-extensions-manage');
 
-    if (file_exists($ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php'))
-        require $ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php';
-    else
-        require $ext_info['path'] . '/lang/English/' . $ext_info['id'] . '.php';
+if (file_exists($ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php'))
+    require $ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php';
+else
+    require $ext_info['path'] . '/lang/English/' . $ext_info['id'] . '.php';
 
 // Setup breadcrumbs
-    $forum_page['crumbs'] = array(
-        array($forum_config['o_board_title'], forum_link($forum_url['index'])),
-        array($lang_admin_common['Forum administration'], forum_link($forum_url['admin_index']))
-    );
+$forum_page['crumbs'] = array(
+    array($forum_config['o_board_title'], forum_link($forum_url['index'])),
+    array($lang_admin_common['Forum administration'], forum_link($forum_url['admin_index']))
+);
 
-    switch ($type) {
-        case 'enable':
-            $forum_page['crumbs'][] = $lang_pun_man_ext_improved['Enable checked'];
-            break;
-        case 'disable':
-            $forum_page['crumbs'][] = $lang_pun_man_ext_improved['Disable checked'];
-            break;
-        case 'uninstall':
-            $forum_page['crumbs'][] = $lang_pun_man_ext_improved['Uninstall checked'];
-            break;
-        default:
-            $forum_page['crumbs'][] = isset($head_notice) ? $head_notice : '';
-    }
+switch ($type)
+{
+    case 'enable':
+        $forum_page['crumbs'][] = $lang_pun_man_ext_improved['Enable checked'];
+        break;
+    case 'disable':
+        $forum_page['crumbs'][] = $lang_pun_man_ext_improved['Disable checked'];
+        break;
+    case 'uninstall':
+        $forum_page['crumbs'][] = $lang_pun_man_ext_improved['Uninstall checked'];
+        break;
+    default:
+        $forum_page['crumbs'][] = isset($head_notice) ? $head_notice : '';
+}
 
-    $forum_page['form_action'] = isset($handle) ? $handle : $base_url . '/admin/extensions.php?section=manage&amp;multy&amp;' . $type . '_sel';
+$forum_page['form_action'] = isset($handle) ? $handle : $base_url . '/admin/extensions.php?section=manage&amp;multy&amp;' . $type . '_sel';
 
-    $forum_page['hidden_fields'] = array(
-        'csrf_token' => '<input type="hidden" name="csrf_token" value="' . generate_form_token($forum_page['form_action']) . '" />'
-    );
-    if (in_array($type, array('enable', 'disable', 'uninstall')) && isset($_POST['extens']))
-        $forum_page['hidden_fields']['selected_extens'] = '<input type="hidden" name="selected_extens" value="' . implode(',', array_keys($_POST['extens'])) . '"/>';
+$forum_page['hidden_fields'] = array(
+    'csrf_token' => '<input type="hidden" name="csrf_token" value="' . generate_form_token($forum_page['form_action']) . '" />'
+);
+if (in_array($type, array('enable', 'disable', 'uninstall')) && isset($_POST['extens']))
+    $forum_page['hidden_fields']['selected_extens'] = '<input type="hidden" name="selected_extens" value="' . implode(',', array_keys($_POST['extens'])) . '"/>';
 
-    require FORUM_ROOT . 'header.php';
+require FORUM_ROOT . 'header.php';
 
 // START SUBST - <!-- forum_main -->
-    ob_start();
+ob_start();
 
 ?>
 
@@ -77,7 +78,8 @@
             <ul class="error-list">
                 <?php
 
-                foreach ($dependencies_error as $dep => $main) {
+                foreach ($dependencies_error as $dep => $main)
+                {
 
                     ?>
                     <li class="warn">
@@ -132,9 +134,9 @@
 
 <?php
 
-    $tpl_temp = trim(ob_get_contents());
-    $tpl_main = str_replace('<!-- forum_main -->', $tpl_temp, $tpl_main);
-    ob_end_clean();
+$tpl_temp = trim(ob_get_contents());
+$tpl_main = str_replace('<!-- forum_main -->', $tpl_temp, $tpl_main);
+ob_end_clean();
 
-    require FORUM_ROOT . 'footer.php';
+require FORUM_ROOT . 'footer.php';
 
