@@ -4,10 +4,10 @@
 	 http://css-tricks.com
 */
 
-* {
+/** {
     margin: 0;
     padding: 0;
-}
+}*/
 
 #pool {
     /* Prevent vertical gaps */

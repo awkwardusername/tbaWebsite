@@ -1,10 +1,12 @@
 .sidebar {
     width: 200px;
-    height: 100%;
-    background-color: #1d1d1d;
+    background: #1d1d1d;
     /*float: left;*/
-    margin-top: 5px;
-    padding-bottom: 10px;
+    padding: 10px;
+    height: 100%;
+    position:absolute;
+    top:0;
+    left:0;
     /*margin-right: -100px;*/
 }
 
@@ -32,10 +34,20 @@
 
 }
 
-#forum {
-    float: right;
+@media screen {
+    body>div #sidebar{
+        position:fixed;
+    }
 
-    width: auto;
+    body>div #header{
+        position:fixed;
+    }
+}
 
-    clear: both;
+* html body{
+    overflow:hidden;
+}
+* html div #forum {
+    height:100%;
+    overflow:auto;
 }
