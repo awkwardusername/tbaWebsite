@@ -1,10 +1,10 @@
 <?php
 
 $db_type = 'mysqli';
-$db_host = '$_ENV['OPENSHIFT_MYSQL_DB_HOST']';
-$db_name = '$_ENV['OPENSHIFT_APP_NAME']';
-$db_username = '$_ENV['OPENSHIFT_MYSQL_DB_USERNAME']';
-$db_password = '$_ENV['OPENSHIFT_MYSQL_DB_PASSWORD']';
+$db_host = '127.2.168.129';
+$db_name = 'tbadraft';
+$db_username = 'admin';
+$db_password = 'ZaQvlvkY8ETa';
 $db_prefix = 'bb_';
 $p_connect = false;
 
