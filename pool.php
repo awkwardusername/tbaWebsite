@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>The Blood Ambulance</title>
     <link rel="stylesheet" type="text/css" href="css/master2.css"/>
-    <link rel="stylesheet" type="text/css" href="css/pool.css" />
+    <link rel="stylesheet" type="text/css" href="css/pool.css"/>
     <link rel="stylesheet" type="text/css" href="css/lightzap.css"/>
     <script src="js/jquery-1.7.2.min.js"></script>
     <script src="js/lightzap.min.js"></script>
@@ -51,6 +51,7 @@
 
 <br/>
 <br/>
+
 <div id="footer">
     <p>Copyright &copy; 2012 The Blood Ambulance. All rights reserved, except from those things which aren't ours.</p>
 </div>

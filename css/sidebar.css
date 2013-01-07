@@ -4,9 +4,9 @@
     /*float: left;*/
     padding: 10px;
     height: 100%;
-    position:absolute;
-    top:0;
-    left:0;
+    position: absolute;
+    top: 0;
+    left: 0;
     /*margin-right: -100px;*/
 }
 
@@ -35,19 +35,20 @@
 }
 
 @media screen {
-    body>div #sidebar{
-        position:fixed;
+    body>div #sidebar {
+        position: fixed;
     }
 
-    body>div #header{
-        position:fixed;
+    body>div #header {
+        position: fixed;
     }
 }
 
-* html body{
-    overflow:hidden;
+* html body {
+    overflow: hidden;
 }
+
 * html div #forum {
-    height:100%;
-    overflow:auto;
+    height: 100%;
+    overflow: auto;
 }

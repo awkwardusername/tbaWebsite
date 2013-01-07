@@ -34,7 +34,7 @@
 
 
     <div id="forum">
-        <iframe src="http://localhost/thebloodambulance/forum/index.php" height="700px" width="99%"></iframe>
+        <iframe src="http://localhost/TheBloodAmbulance/forum/" height="700px" width="99%"></iframe>
     </div>
 </div>
 

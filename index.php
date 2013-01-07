@@ -24,31 +24,31 @@
             href="about.php">?!~</a>
     </div>
 </div>
-        <div id="content">
-            <div id="post-pic">
-                <a href="images/main/post-pic.png" rel="lightzap" title="MPTD # 2332">
-                    <img src="images/main/post-pic.png" alt="MPTD # 2332" width="100%"/></a>
-            </div>
-            <div id="post-desc">
-                <h1>MPTD # 2332</h1>
+<div id="content">
+    <div id="post-pic">
+        <a href="images/main/post-pic.png" rel="lightzap" title="MPTD # 2332">
+            <img src="images/main/post-pic.png" alt="MPTD # 2332" width="100%"/></a>
+    </div>
+    <div id="post-desc">
+        <h1>MPTD # 2332</h1>
 
-                <p>Some obviously awesome description of what this image is. Some obviously awesome description of what
-                    this image is. Some obviously awesome description of what this image is. Some obviously awesome
-                    description of what this image is. Some obviously awesome description of what this image is. </p>
-            </div>
+        <p>Some obviously awesome description of what this image is. Some obviously awesome description of what
+            this image is. Some obviously awesome description of what this image is. Some obviously awesome
+            description of what this image is. Some obviously awesome description of what this image is. </p>
+    </div>
 
-            <div id="toprated">
-                <h1>Top Rated Pictures</h1>
+    <div id="toprated">
+        <h1>Top Rated Pictures</h1>
 
-                <p>blah</p>
-            </div>
-            <div id="recentuploads">
-                <h1>Recently Uploaded Pictures</h1>
+        <p>blah</p>
+    </div>
+    <div id="recentuploads">
+        <h1>Recently Uploaded Pictures</h1>
 
-                <p>blah</p>
-            </div>
-        </div>
-        <!-- msain -->
+        <p>blah</p>
+    </div>
+</div>
+<!-- msain -->
 
 <br/>
 <br/>

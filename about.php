@@ -26,13 +26,14 @@
 </div>
 
 <div id="content">
-        The Blood Ambulance is a website dedicated for presenting and featuring digital wallpapers
-        and pictures created in anime/manga style that is usually found in websites such as pixiv.net, deviantart.com
-        and the rest of the internet. The users could also upload his/her image or any image that he had found in the
-        internet that will satisfy the website's purpose.
+    The Blood Ambulance is a website dedicated for presenting and featuring digital wallpapers
+    and pictures created in anime/manga style that is usually found in websites such as pixiv.net, deviantart.com
+    and the rest of the internet. The users could also upload his/her image or any image that he had found in the
+    internet that will satisfy the website's purpose.
 </div>
 <br/>
 <br/>
+
 <div id="footer">
     <p>Copyright &copy; 2012 The Blood Ambulance. All rights reserved, except from those things which aren't ours.</p>
 
