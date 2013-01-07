@@ -1,5 +1,4 @@
 ﻿a:link {
-    color: #fff;
     text-decoration: none;
     color: #cecece;
 }
@@ -20,11 +19,11 @@ body {
     margin: 0;
     background: #333333;
     color: #efefef;
-    padding: 90px 0 35px 0;
+    padding: 90px 0 35px 250px;
     font: 13px Segoe UI, Helvetica, sans-serif
 }
 
-div#header {
+#header {
     position: absolute;
     top: 0;
     left: 0;
@@ -33,18 +32,33 @@ div#header {
     background: #333333;
 }
 
-div#logo {
+#navi {
+    background: #101010;
+    color: #cecece;
+    text-align: left;
+    padding: 7px;
+    padding-left: 10pt;
+    font-weight: bold;
+    font-size: 12pt;
+    clear: both;
+}
+
+#logo {
     padding-left: 10px;
     height: 44px;
     width: 472px;
     padding: 10px;
     padding-top: 7px;
     padding-bottom: 0;
-
     margin-left: 5px;
+    float: left;
 }
 
-div#footer {
+#user {
+    float: right;
+}
+
+#footer {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -61,6 +75,21 @@ div#footer {
     alignment-baseline: middle;
 }
 
+#content_forum {
+    top: 88px;
+    width: 100%;
+    height: 500%;
+}
+
+#sidebar {
+    background: #1d1d1d;
+    position: absolute;
+    top: 88px;
+    left: 0;
+    width: 250px;
+    height: 100%;
+}
+
 @media screen {
     body>div#header {
         position: fixed;
@@ -69,26 +98,21 @@ div#footer {
     body>div#footer {
         position: fixed;
     }
+
+    body>div#sidebar {
+        position: fixed;
+    }
+
+    body>div#forum {
+        position: fixed;
+    }
 }
 
 * html body {
     overflow: hidden;
 }
 
-* html div#content {
+* html #content {
     height: 100%;
     overflow: auto;
-}
-
-*
-
-#navi {
-    background: #101010;
-    color: #cecece;
-    text-align: left;
-    padding: 7px;
-    padding-left: 10pt;
-    font-weight: bold;
-    font-size: 12pt;
-
 }

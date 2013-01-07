@@ -10,15 +10,15 @@
 
 
 $forum_reserved_strings = array(
-	''				=>	'view',
+    '' => 'view',
 
-	'newpost'		=>	'view',
-	'newposts'		=>	'view',
-	'new-post'		=>	'view',
-	'new-posts'		=>	'view',
+    'newpost' => 'view',
+    'newposts' => 'view',
+    'new-post' => 'view',
+    'new-posts' => 'view',
 
-	'lastpost'		=>	'view',
-	'lastposts'		=>	'view',
-	'last-post'		=>	'view',
-	'last-posts'	=>	'view',
+    'lastpost' => 'view',
+    'lastposts' => 'view',
+    'last-post' => 'view',
+    'last-posts' => 'view',
 );

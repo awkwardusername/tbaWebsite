@@ -10,43 +10,43 @@
 
 // Make sure no one attempts to run this script "directly"
 if (!defined('FORUM'))
-	exit;
+    exit;
 
 
 // Load the appropriate DB layer class
 switch ($db_type)
 {
-	case 'mysql':
-		require FORUM_ROOT.'include/dblayer/mysql.php';
-		break;
+    case 'mysql':
+        require FORUM_ROOT . 'include/dblayer/mysql.php';
+        break;
 
-	case 'mysql_innodb':
-		require FORUM_ROOT.'include/dblayer/mysql_innodb.php';
-		break;
+    case 'mysql_innodb':
+        require FORUM_ROOT . 'include/dblayer/mysql_innodb.php';
+        break;
 
-	case 'mysqli':
-		require FORUM_ROOT.'include/dblayer/mysqli.php';
-		break;
+    case 'mysqli':
+        require FORUM_ROOT . 'include/dblayer/mysqli.php';
+        break;
 
-	case 'mysqli_innodb':
-		require FORUM_ROOT.'include/dblayer/mysqli_innodb.php';
-		break;
+    case 'mysqli_innodb':
+        require FORUM_ROOT . 'include/dblayer/mysqli_innodb.php';
+        break;
 
-	case 'pgsql':
-		require FORUM_ROOT.'include/dblayer/pgsql.php';
-		break;
+    case 'pgsql':
+        require FORUM_ROOT . 'include/dblayer/pgsql.php';
+        break;
 
-	case 'sqlite':
-		require FORUM_ROOT.'include/dblayer/sqlite.php';
-		break;
+    case 'sqlite':
+        require FORUM_ROOT . 'include/dblayer/sqlite.php';
+        break;
 
-	case 'sqlite3':
-		require FORUM_ROOT.'include/dblayer/sqlite3.php';
-		break;
+    case 'sqlite3':
+        require FORUM_ROOT . 'include/dblayer/sqlite3.php';
+        break;
 
-	default:
-		error('\''.$db_type.'\' is not a valid database type. Please check settings in config.php.', __FILE__, __LINE__);
-		break;
+    default:
+        error('\'' . $db_type . '\' is not a valid database type. Please check settings in config.php.', __FILE__, __LINE__);
+        break;
 }
 
 

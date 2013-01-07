@@ -10,110 +10,112 @@
 
 class FlashMessenger
 {
-	const TEMPLATE_MSG_BLOCK = '%s';
-	const TEMPLATE_MSG = '<span class="%s">%s</span>';
+    const TEMPLATE_MSG_BLOCK = '%s';
+    const TEMPLATE_MSG = '<span class="%s">%s</span>';
 
-	//
-	const MSG_TYPE_ERROR = 'message_error';
-	const MSG_TYPE_WARNING = 'message_warning';
-	const MSG_TYPE_INFO = 'message_info';
+    //
+    const MSG_TYPE_ERROR = 'message_error';
+    const MSG_TYPE_WARNING = 'message_warning';
+    const MSG_TYPE_INFO = 'message_info';
 
-	//
-	private $messages;
-
-
-	public function __construct()
-	{
-		session_cache_limiter(FALSE);
-		$result = session_start();
-		$this->messages = $this->get_messages();
-	}
+    //
+    private $messages;
 
 
-	// Add error message
-	public function add_error($msg)
-	{
-		$this->add_message($msg, self::MSG_TYPE_ERROR);
-	}
+    public function __construct()
+    {
+        session_cache_limiter(FALSE);
+        $result = session_start();
+        $this->messages = $this->get_messages();
+    }
 
 
-	// Add warning message
-	public function add_warning($msg)
-	{
-		$this->add_message($msg, self::MSG_TYPE_WARNING);
-	}
+    // Add error message
+    public function add_error($msg)
+    {
+        $this->add_message($msg, self::MSG_TYPE_ERROR);
+    }
 
 
-	// Add info message
-	public function add_info($msg)
-	{
-		$this->add_message($msg, self::MSG_TYPE_INFO);
-	}
+    // Add warning message
+    public function add_warning($msg)
+    {
+        $this->add_message($msg, self::MSG_TYPE_WARNING);
+    }
 
 
-	//
-	public function show($just_return = false)
-	{
-		if (empty($this->messages))
-			return;
-
-		$messages_list = array();
-		foreach ($this->messages as $msg)
-		{
-			$messages_list[] = sprintf(self::TEMPLATE_MSG, forum_htmlencode($msg[1]), forum_htmlencode($msg[0]));
-		}
-
-		if (!empty($messages_list))
-		{
-			$m = sprintf(self::TEMPLATE_MSG_BLOCK, implode('', $messages_list));
-			if ($just_return) {
-				$this->clear();
-				return $m;
-			}
-
-			echo $m;
-		}
-
-		$this->clear();
-	}
+    // Add info message
+    public function add_info($msg)
+    {
+        $this->add_message($msg, self::MSG_TYPE_INFO);
+    }
 
 
-	//
-	private function clear()
-	{
-		$this->messages = array();
-		$this->save_messages();
-	}
+    //
+    public function show($just_return = false)
+    {
+        if (empty($this->messages))
+            return;
+
+        $messages_list = array();
+        foreach ($this->messages as $msg)
+        {
+            $messages_list[] = sprintf(self::TEMPLATE_MSG, forum_htmlencode($msg[1]), forum_htmlencode($msg[0]));
+        }
+
+        if (!empty($messages_list))
+        {
+            $m = sprintf(self::TEMPLATE_MSG_BLOCK, implode('', $messages_list));
+            if ($just_return)
+            {
+                $this->clear();
+                return $m;
+            }
+
+            echo $m;
+        }
+
+        $this->clear();
+    }
 
 
-	//
-	private function add_message($message, $type)
-	{
-		array_push($this->messages, array($message, $type));
-
-		$this->save_messages();
-	}
-
-
-	private function save_messages()
-	{
-		 $_SESSION['punbb_forum_flash'] = serialize($this->messages);
-	}
+    //
+    private function clear()
+    {
+        $this->messages = array();
+        $this->save_messages();
+    }
 
 
-	private function get_messages()
-	{
-		$messages = array();
+    //
+    private function add_message($message, $type)
+    {
+        array_push($this->messages, array($message, $type));
 
-		if (isset($_SESSION['punbb_forum_flash'])) {
-			$tmp_messages = unserialize($_SESSION['punbb_forum_flash']);
+        $this->save_messages();
+    }
 
-			if (is_array($tmp_messages))
-				$messages = $tmp_messages;
-		}
 
-		return $messages;
-	}
+    private function save_messages()
+    {
+        $_SESSION['punbb_forum_flash'] = serialize($this->messages);
+    }
+
+
+    private function get_messages()
+    {
+        $messages = array();
+
+        if (isset($_SESSION['punbb_forum_flash']))
+        {
+            $tmp_messages = unserialize($_SESSION['punbb_forum_flash']);
+
+            if (is_array($tmp_messages))
+                $messages = $tmp_messages;
+        }
+
+        return $messages;
+    }
 }
 
 

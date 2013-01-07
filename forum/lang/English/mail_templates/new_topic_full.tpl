@@ -1,18 +1,22 @@
-Subject: New topic in forum: <forum_name>
+Subject: New topic in forum:
+<forum_name>
 
-<topic_starter> has created new topic <topic_subject> in forum to which you are subscribed.
+    <topic_starter> has created new topic
+        <topic_subject> in forum to which you are subscribed.
 
-The topic message reads as follows:
------------------------------------------------------------------------
+            The topic message reads as follows:
+            -----------------------------------------------------------------------
 
-<message>
+            <message>
 
------------------------------------------------------------------------
+                -----------------------------------------------------------------------
 
-The new topic is located at <topic_url>
+                The new topic is located at
+                <topic_url>
 
-You can unsubscribe by going to <unsubscribe_url>
+                    You can unsubscribe by going to
+                    <unsubscribe_url>
 
---
-<board_mailer>
-(Do not reply to this message)
+                        --
+                        <board_mailer>
+                            (Do not reply to this message)
