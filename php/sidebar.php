@@ -8,5 +8,4 @@
  */
 include "forum/config.php";
 echo "<strong> tralalala</strong>";
-echo "{$_GET['sadsd']}"
 ?>
