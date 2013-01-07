@@ -1,7 +1,7 @@
 <?php
 
 $db_type = 'mysqli';
-$db_host = '127.2.168.129';
+$db_host = "127.2.168.129";
 $db_name = 'tbadraft';
 $db_username = 'admin';
 $db_password = 'ZaQvlvkY8ETa';
