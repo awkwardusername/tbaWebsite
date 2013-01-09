@@ -8,7 +8,7 @@ $db_password = 'ZaQvlvkY8ETa';
 $db_prefix = 'bb_';
 $p_connect = false;
 
-$base_url = 'tbadraft-awkwardusername.rhcloud.com/forum';
+$base_url = 'http://tbadraft-awkwardusername.rhcloud.com/forum';
 
 $cookie_name = 'forum_cookie_e5a4ae';
 $cookie_domain = '';
