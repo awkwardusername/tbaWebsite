@@ -42,16 +42,8 @@
         <?php
         for ($i = 1; $i < 64; $i++)
         {
-            echo '<a href=\'pool/uploads/q (';
-            echo $i;
-            echo ').jpg\' ';
-            echo 'rel=\'lightbox[pool]\' title=\'';
-            echo $i;
-            echo '\'><img src=\'pool/thumbs/q (';
-            echo $i;
-            echo ').jpg\' alt=\'';
-            echo $i;
-            echo '\' /></a>';
+            echo "<a href='pool/gallery/{$i}.jpg' rel='lightbox[pool]' title='{$i}'>";
+            echo "<img src='pool/thumbs/{$i}.jpg' alt='{$i}' /></a>";
         }
         ?>
 

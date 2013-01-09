@@ -57,8 +57,8 @@
 </div>
 <div id="content">
     <div id="post-pic">
-        <a href="images/main/post-pic.png" rel="lightzap" title="MPTD # 2332">
-            <img src="images/main/post-pic.png" alt="MPTD # 2332" width="100%"/></a>
+        <a href="images/main/post-pic.jpg" rel="lightzap" title="MPTD # 2332">
+            <img src="images/main/post-pic.jpg" alt="MPTD # 2332" width="100%"/></a>
     </div>
     <div id="post-desc">
         <h1>MPTD # 2332</h1>

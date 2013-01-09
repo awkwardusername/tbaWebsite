@@ -6,6 +6,7 @@
  * Time: 1:23 PM
  * To change this template use File | Settings | File Templates.
  */
-include "forum/config.php";
-echo "<strong> tralalala</strong>";
+include_once "forum/config.php";
+echo "<h2><strong> Shoutbox</strong></h2>";
+
 ?>

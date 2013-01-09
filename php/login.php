@@ -1,4 +1,4 @@
 <?php
-include "forum/config.php";
-echo "sdasdsa";
+include_once "forum/config.php";
+echo "Welcome, ";
 ?>
