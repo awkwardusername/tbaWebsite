@@ -6,7 +6,8 @@
     <link rel="stylesheet" type="text/css" href="css/master2.css"/>
     <link rel="stylesheet" type="text/css" href="css/lightzap.css"/>
     <link rel="shortcut icon" type="image/gif" href="favicon.gif"/>
-    <script src="js/jquery-1.7.2.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="http://cdn.jquerytools.org/1.2.7/all/jquery.tools.min.js"></script>
     <script src="js/lightzap.min.js"></script>
 </head>
 
