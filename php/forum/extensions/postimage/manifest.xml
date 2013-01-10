@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE extension SYSTEM "ext-1.0.dtd">
+
+<extension engine="1.0">
+	<id>postimage</id>
+	<title>Simple Image Upload</title>
+	<version>1.4.0</version>
+	<description>This mod integrates image hosting with PunBB. It makes image upload very simple. All images are hosted on remote image hosting service, not on your forum. When user uploads image, script creates a thumbnail for image and appends bbcode to post user is typing. User doesn't need to know anything about bbcode. And this mod is very simple to install.</description>
+	<author>Sium</author>
+	<minversion>1.3</minversion>
+	<maxtestedon>1.4.2</maxtestedon>
+	
+	<install><![CDATA[
+	]]></install>
+
+	<uninstall><![CDATA[
+	]]></uninstall>
+	
+    <hooks>
+		<hook id="hd_head"><![CDATA[
+			$forum_head['postimage']="<script type='text/javascript' src='http://mod.postimage.org/punbb-english.js' charset='utf-8'></script>\n";
+		]]></hook>
+    </hooks>
+	
+</extension>
