@@ -49,7 +49,7 @@ switch ($do) {
             clearsessionscookies();
             header("location: login.php?returnurl=$returnurl");
         } else {
-            if (confirmuser($username, md5($password))) // As pointed out by asgard2005
+            if (confirmuser($username, $password)) // As pointed out by asgard2005
             {
                 createsessions($username, $password);
                 if ($returnurl <> "")

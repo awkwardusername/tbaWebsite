@@ -164,5 +164,4 @@ pip-log.txt
 
 .idea/
 cache/
-extensions/
 *.db
