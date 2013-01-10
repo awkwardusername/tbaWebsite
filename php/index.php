@@ -40,12 +40,12 @@
     </div>
     <div id="user">
         <?php
-        include "login.php";
+        include "head_login.php";
         ?>
     </div>
     <div id="navi">
         <a href="index.php">home</a> | <a href="pool.php">pool</a> | <a href="members.php">members</a> | <a
-            href="about.php">?!~</a>
+            href="about.php">?!~</a> | <a href="forum/index.php" target="_blank">Forums</a>
     </div>
 </div>
 <div id="sidebar">
@@ -135,16 +135,16 @@
                     <a href="pool/thumb-1.jpg" rel="lightzap[hurr]"><img src="pool/thumb-1.jpg"/></a>
                 </td>
                 <td class="single" colspan="2">
-                    <a href="pool/thumb-1.jpg" rel="lightzap[hurr]"><img src="pool/thumb-1.jpg"/></a>
+                    <a href="pool/thumb-2.jpg" rel="lightzap[hurr]"><img src="pool/thumb-2.jpg"/></a>
                 </td>
                 <td class="single" colspan="2">
-                    <a href="pool/thumb-1.jpg" rel="lightzap[hurr]"><img src="pool/thumb-1.jpg"/></a>
+                    <a href="pool/thumb-3.jpg" rel="lightzap[hurr]"><img src="pool/thumb-3.jpg"/></a>
                 </td>
                 <td class="single" colspan="2">
-                    <a href="pool/thumb-1.jpg" rel="lightzap[hurr]"><img src="pool/thumb-1.jpg"/></a>
+                    <a href="pool/thumb-4.jpg" rel="lightzap[hurr]"><img src="pool/thumb-4.jpg"/></a>
                 </td>
                 <td class="single" colspan="2">
-                    <a href="pool/thumb-1.jpg" rel="lightzap[hurr]"><img src="pool/thumb-1.jpg"/></a>
+                    <a href="pool/thumb-5.jpg" rel="lightzap[hurr]"><img src="pool/thumb-5.jpg"/></a>
                 </td>
             </tr>
             <tr>

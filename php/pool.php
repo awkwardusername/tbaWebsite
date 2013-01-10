@@ -22,12 +22,12 @@
     </div>
     <div id="user">
         <?php
-        include "login.php";
+        include "head_login.php";
         ?>
     </div>
     <div id="navi">
         <a href="index.php">home</a> | <a href="pool.php">pool</a> | <a href="members.php">members</a> | <a
-            href="about.php">?!~</a>
+            href="about.php">?!~</a> | <a href="forum/index.php" target="_blank">Forums</a>
     </div>
 </div>
 <div id="sidebar">

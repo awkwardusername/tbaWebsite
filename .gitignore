@@ -162,5 +162,7 @@ pip-log.txt
 # Mac crap
 .DS_Store
 
-.idea
+.idea/
+cache/
+extensions/
 *.db
